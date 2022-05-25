@@ -9,6 +9,7 @@ namespace Quizzer.WPF.PromptTypes;
 public class GuessTheLetterPrompt : Prompt
 {
     private const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private const int AnswerCount = 4;
     public override Question GenerateQuestion()
     {
         int index;
@@ -20,10 +21,12 @@ public class GuessTheLetterPrompt : Prompt
         var s = new StringBuilder(ShowText) { [index] = '_' };
         MutilatedText = s.ToString();
         var possibleAnswers = new HashSet<char> { ShowText[index] };
-        while (possibleAnswers.Count < 4)
+        var letterCopy = Letters.ToCharArray().ToList();
+        while (possibleAnswers.Count < AnswerCount && letterCopy.Count > 0)
         {
-            index = Random.Shared.Next(0, Letters.Length);
-            possibleAnswers.Add(Letters[index]);
+            index = Random.Shared.Next(0, letterCopy.Count);
+            possibleAnswers.Add(letterCopy[index]);
+            letterCopy.RemoveAt(index);
         }
 
         var ans = possibleAnswers.OrderBy(x => x).Select(x => new Answer()
