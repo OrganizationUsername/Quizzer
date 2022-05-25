@@ -1,0 +1,68 @@
+﻿<Window x:Class="Quizzer.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Quizzer.WPF"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        x:Name="QuestionWindow"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <local:Base64ImageConverter x:Key="Base64ImageConverter"/>
+    </Window.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <TabControl>
+        <TabItem Header="Administration">
+            <StackPanel>
+                <StackPanel Width="300" HorizontalAlignment="Left">
+                    <ListBox ItemsSource="{Binding AdministrationViewModel.Quizzes}" SelectionMode="Single" SelectedItem="{Binding AdministrationViewModel.SelectedQuiz}"/>
+                    <Button Command="{Binding AdministrationViewModel.SubmitAnswerCommand}" Content="Select Quiz"/>
+                </StackPanel>
+                <Button Content="SelectFile" Command="{Binding AdministrationViewModel.SelectFileCommand}"/>
+            </StackPanel>
+        </TabItem>
+        <TabItem Header="Quiz">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Viewbox Width="{Binding QuizViewModel.CurrentQuestions.Prompt.Width}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding QuizViewModel.CurrentQuestions.Prompt.MutilatedText}"/>
+                            <Image Width="75" Height="75" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI, Converter={StaticResource Base64ImageConverter}}"/>
+                        </StackPanel>
+                    </Viewbox>
+                    <!--<Image Width="150" Height="150" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI}"/>-->
+                    <!--<Image Width="75" Height="75" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI, Converter={StaticResource Base64ImageConverter}}"/>-->
+
+                    <ItemsControl ItemsSource="{Binding QuizViewModel.CurrentQuestions.Answers}" VerticalAlignment="Center" HorizontalAlignment="center" Margin="100">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+
+                                    <Button Margin="10" 
+                                        Command="{Binding ElementName=QuestionWindow, Path=DataContext.QuizViewModel.SubmitAnswerCommand}" 
+                                        CommandParameter="{Binding Text}">
+
+                                        <TextBlock Text="{Binding Text}" Margin="10"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+    </TabControl>
+</Window>
