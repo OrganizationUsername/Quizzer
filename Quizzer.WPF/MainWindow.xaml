@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Quizzer.WPF"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:converters="clr-namespace:Quizzer.WPF.Converters"
         mc:Ignorable="d"
         x:Name="QuestionWindow"
         Title="MainWindow" Height="450" Width="800">
@@ -12,7 +13,7 @@
         <local:MainViewModel />
     </Window.DataContext>
     <Window.Resources>
-        <local:Base64ImageConverter x:Key="Base64ImageConverter"/>
+        <converters:Base64ImageConverter x:Key="Base64ImageConverter"/>
     </Window.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
@@ -32,14 +33,12 @@
         <TabItem Header="Quiz">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <Viewbox Width="{Binding QuizViewModel.CurrentQuestions.Prompt.Width}">
+                    <Viewbox Width="{Binding QuizViewModel.CurrentQuestions.Prompt.Width}" HorizontalAlignment="Center">
                         <StackPanel>
                             <TextBlock Text="{Binding QuizViewModel.CurrentQuestions.Prompt.MutilatedText}"/>
                             <Image Width="75" Height="75" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI, Converter={StaticResource Base64ImageConverter}}"/>
                         </StackPanel>
                     </Viewbox>
-                    <!--<Image Width="150" Height="150" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI}"/>-->
-                    <!--<Image Width="75" Height="75" Source="{Binding QuizViewModel.CurrentQuestions.Prompt.ImageURI, Converter={StaticResource Base64ImageConverter}}"/>-->
 
                     <ItemsControl ItemsSource="{Binding QuizViewModel.CurrentQuestions.Answers}" VerticalAlignment="Center" HorizontalAlignment="center" Margin="100">
                         <ItemsControl.ItemTemplate>
@@ -50,7 +49,7 @@
                                         Command="{Binding ElementName=QuestionWindow, Path=DataContext.QuizViewModel.SubmitAnswerCommand}" 
                                         CommandParameter="{Binding Text}">
 
-                                        <TextBlock Text="{Binding Text}" Margin="10"/>
+                                        <TextBlock Text="{Binding Text}" Margin="10" FontWeight="Bold"/>
                                     </Button>
                                 </StackPanel>
                             </DataTemplate>
