@@ -1,11 +1,12 @@
-﻿<UserControl x:Class="Quizzer.WPF.QuizView"
+﻿<UserControl x:Class="Quizzer.WPF.Quiz.QuizView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Quizzer.WPF"
              xmlns:converters="clr-namespace:Quizzer.WPF.Converters"
              xmlns:models="clr-namespace:Quizzer.WPF.Models"
+             xmlns:quiz="clr-namespace:Quizzer.WPF.Quiz"
+             d:DataContext="{d:DesignInstance Type=quiz:QuizViewModel}"
              mc:Ignorable="d" 
              x:Name="UserControl"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -25,7 +26,7 @@
                     <DataTemplate DataType="models:Answer">
                         <StackPanel>
                             <Button Margin="10" 
-                                    Command="{Binding ElementName=UserControl, Path=DataContext.(local:QuizViewModel.SubmitAnswerCommand)}" 
+                                    Command="{Binding ElementName=UserControl, Path=DataContext.(quiz:QuizViewModel.SubmitAnswerCommand)}" 
                                     CommandParameter="{Binding Text}">
                                 <TextBlock Text="{Binding Text}" Margin="10" FontWeight="Bold"/>
                             </Button>

@@ -1,4 +1,2 @@
-﻿using System.Windows;
-
-namespace Quizzer.WPF;
-public partial class MainWindow : Window { public MainWindow() => InitializeComponent(); }
+﻿namespace Quizzer.WPF;
+public partial class MainWindow : System.Windows.Window { public MainWindow() => InitializeComponent(); }

@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Admin;
 using Quizzer.WPF.Models;
 
-namespace Quizzer.WPF;
+namespace Quizzer.WPF.Quiz;
 
 internal class MainViewModel : ObservableObject
 {
@@ -21,7 +21,6 @@ internal class MainViewModel : ObservableObject
         AdministrationViewModel = new(this);
         QuizViewModel = new();
     }
-
     public void Loaded() => Debug.WriteLine($"I forget why I wanted this.");
 }
 
@@ -35,10 +34,9 @@ internal class QuizViewModel : ObservableObject
 
     public QuizViewModel()
     {
-        var qs = new ObservableCollection<Question>(PromptGetter.GetCleanPrompts().Select(x => x.GenerateQuestion()));
-
-        foreach (var question in qs) { Questions.Add(question); }
-        CurrentQuestions = Questions.First();
+        //var qs = new ObservableCollection<Question>(PromptGetter.GetCleanPrompts().Select(x => x.GenerateQuestion()));
+        //foreach (var question in qs) { Questions.Add(question); }
+        //CurrentQuestions = Questions.First();
     }
 
     public void SubmitAnswer(string a)
