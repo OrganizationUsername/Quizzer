@@ -4,14 +4,59 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:admin="clr-namespace:Quizzer.WPF.Admin"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:promptTypes="clr-namespace:Quizzer.WPF.PromptTypes"
+             xmlns:models="clr-namespace:Quizzer.WPF.Models"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance admin:AdministrationViewModel}">
-    <StackPanel>
-        <StackPanel Width="300" HorizontalAlignment="Left">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type promptTypes:GuessTheLetterPrompt}">
+            <promptTypes:GuessTheLetterPromptView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type promptTypes:TypeTheWordPrompt}">
+            <promptTypes:TypeTheWordPromptView/>
+        </DataTemplate>
+    </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
             <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" SelectedItem="{Binding SelectedQuiz}"/>
             <Button Command="{Binding SubmitAnswerCommand}" Content="Select Quiz"/>
         </StackPanel>
-        <Button Content="SelectFile" Command="{Binding SelectFileCommand}"/>
-    </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="0">
+            <DockPanel >
+                <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
+                <TextBox HorizontalAlignment="Stretch"/>
+
+            </DockPanel>
+
+
+            <Button Content="Create new Quiz"/>
+
+            <Button Content="Add question"/>
+            <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="1">
+            <ContentControl  Content="{Binding NewPrompt}" />
+            <TextBlock Text="fff"/>
+        </StackPanel>
+
+
+        <Button Content="SelectImage" Command="{Binding SelectImageCommand}" Grid.Column="0" Grid.Row="1"/>
+    </Grid>
 </UserControl>

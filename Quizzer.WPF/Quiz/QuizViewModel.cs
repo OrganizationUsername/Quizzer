@@ -35,8 +35,8 @@ internal class QuizViewModel : ObservableObject
     public QuizViewModel()
     {
         //var qs = new ObservableCollection<Question>(PromptGetter.GetCleanPrompts().Select(x => x.GenerateQuestion()));
-        //foreach (var question in qs) { Questions.Add(question); }
-        //CurrentQuestions = Questions.First();
+        //foreach (var question in qs) { QuestionTypes.Add(question); }
+        //CurrentQuestions = QuestionTypes.First();
     }
 
     public void SubmitAnswer(string a)
