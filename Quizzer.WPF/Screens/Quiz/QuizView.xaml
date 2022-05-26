@@ -19,6 +19,7 @@
                 <StackPanel>
                     <TextBlock Text="{Binding CurrentQuestions.Prompt.MutilatedText}"/>
                     <Image Width="75" Height="75" Source="{Binding CurrentQuestions.Prompt.ImageURI, Converter={StaticResource Base64ImageConverter}}"/>
+                    <Button Content="Speak" Command="{Binding SpeakCommand}" />
                 </StackPanel>
             </Viewbox>
             <ItemsControl ItemsSource="{Binding CurrentQuestions.Answers}" VerticalAlignment="Center" HorizontalAlignment="center" Margin="100">
@@ -30,6 +31,7 @@
                                     CommandParameter="{Binding Text}">
                                 <TextBlock Text="{Binding Text}" Margin="10" FontWeight="Bold"/>
                             </Button>
+
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -39,6 +41,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
+            
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Speech.Synthesis;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Models;
+
 
 namespace Quizzer.WPF.Screens.Quiz;
 
@@ -17,6 +19,8 @@ public partial class QuizViewModel
     public Question CurrentQuestions { get => _currentQuestions; set => SetProperty(ref _currentQuestions, value); }
     public List<string> Results { get; set; } = new();
     public RelayCommand<string> SubmitAnswerCommand => new(SubmitAnswer!);
+    public RelayCommand SpeakCommand => new(Speak);
+    private readonly SpeechSynthesizer speechSynthesizer = new SpeechSynthesizer();
 
     public QuizViewModel()
     {
@@ -24,6 +28,8 @@ public partial class QuizViewModel
         //foreach (var question in qs) { QuestionTypes.Add(question); }
         //CurrentQuestions = QuestionTypes.First();
     }
+
+    public void Speak() => speechSynthesizer.Speak(CurrentQuestions.Prompt.ShowText);
 
     public void SubmitAnswer(string a)
     {
