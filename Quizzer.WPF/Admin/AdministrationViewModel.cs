@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,7 @@ public class AdministrationViewModel : ObservableObject
     public ObservableCollection<NameAndType> QuestionTypes { get; set; }
     public string? SelectedQuiz { get; set; }
     public RelayCommand LoadedCommand => new(Loaded);
+    public RelayCommand GetJsonCommand => new(GetJsonOfQuestions);
     private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
     private NameAndType _selectedQuestionType;
     public IPromptViewModel PromptViewModel { get; set; }
@@ -45,6 +47,11 @@ public class AdministrationViewModel : ObservableObject
         SelectedQuestionType = QuestionTypes.First();
     }
 
+    public void GetJsonOfQuestions()
+    {
+        var text = System.Text.Json.JsonSerializer.Serialize(Prompts);
+        Debug.WriteLine(text);
+    }
     public NameAndType SelectedQuestionType
     {
         get => _selectedQuestionType;

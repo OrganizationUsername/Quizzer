@@ -4,13 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:promptTypes="clr-namespace:Quizzer.WPF.PromptTypes"
+             xmlns:converters="clr-namespace:Quizzer.WPF.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance promptTypes:GuessTheLetterPromptViewModel}">
+    <UserControl.Resources>
+        <converters:Base64ImageConverter x:Key="Base64ImageConverter"/>
+    </UserControl.Resources>
     <StackPanel>
         <TextBlock Text="GuessTheWordPrompt"/>
         <TextBox Text="{Binding ShowText}"/>
         <TextBox Text="{Binding Width}"/>
         <Button Content="Add Question" Command="{Binding GetModelCommand}"/>
+        <Button Content="SelectImage" Command="{Binding SelectImageCommand}" Grid.Column="0" Grid.Row="1"/>
+        <Image Width="75" Height="75" Source="{Binding  ImageUri, Converter={StaticResource Base64ImageConverter}}"/>
     </StackPanel>
 </UserControl>

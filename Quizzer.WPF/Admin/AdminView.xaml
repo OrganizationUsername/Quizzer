@@ -42,21 +42,20 @@
             <DockPanel >
                 <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
                 <TextBox HorizontalAlignment="Stretch"/>
-
             </DockPanel>
-
 
             <Button Content="Create new Quiz"/>
 
             <Button Content="Add question"/>
             <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
             <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
+            <Button Content="Json" Command="{Binding GetJsonCommand}"/>
         </StackPanel>
         <StackPanel Grid.Column="2" Grid.Row="0">
             <ContentControl  Content="{Binding PromptViewModel}" />
         </StackPanel>
 
-
-        <Button Content="SelectImage" Command="{Binding SelectImageCommand}" Grid.Column="0" Grid.Row="1"/>
+        <!--<Button Content="SelectImage" Command="{Binding SelectImageCommand}" Grid.Column="0" Grid.Row="1"/>-->
+        
     </Grid>
 </UserControl>
