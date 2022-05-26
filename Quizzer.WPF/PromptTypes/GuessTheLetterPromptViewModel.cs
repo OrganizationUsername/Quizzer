@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Admin;
-using Quizzer.WPF.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
@@ -15,7 +13,6 @@ namespace Quizzer.WPF.PromptTypes;
 public interface IPromptViewModel
 {
     public AdministrationViewModel Administration { get; set; }
-    public void GetModel();
 }
 
 [ObservableObject]
@@ -25,6 +22,8 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     [ObservableProperty] public string _showText = "";
     [ObservableProperty] public int _width = 150;
     [ObservableProperty] public string? _imageUri = null;
+    public readonly string Type = "GuessTheLetterPrompt";
+
     public RelayCommand GetModelCommand => new(GetModel);
     public RelayCommand SelectImageCommand => new(SelectImage);
     public void SelectImage()
@@ -57,28 +56,12 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         {
             ShowText = _showText,
             Width = _width,
-            ImageURI = _imageUri
+            ImageURI = _imageUri,
+            Type = Type,
         };
         Administration.Prompts.Add(t);
         ShowText = "";
         Width = 150;
         _imageUri = null;
-    }
-}
-
-[ObservableObject]
-internal partial class TypeTheWordPromptViewModel : IPromptViewModel
-{
-    public AdministrationViewModel Administration { get; set; } = null!;
-    [ObservableProperty] public string _showText = "";
-    [ObservableProperty] public int _width = 150;
-    public void GetModel()
-    {
-        var t = new GuessTheLetterPrompt()
-        {
-            ShowText = _showText,
-            Width = _width,
-        };
-        Administration.Prompts.Add(t);
     }
 }
