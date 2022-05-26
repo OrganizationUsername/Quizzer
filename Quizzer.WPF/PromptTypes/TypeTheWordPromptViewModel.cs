@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Quizzer.WPF.Admin;
+using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.WPF.PromptTypes;
 
@@ -16,7 +16,7 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
         if (_imageUri is null || string.IsNullOrWhiteSpace(ShowText)) { return; }
         var t = new GuessTheLetterPrompt()
         {
-            ShowText = _showText,
+            ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             ImageURI = _imageUri,
             Type = Type,

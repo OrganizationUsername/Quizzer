@@ -1,30 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Quizzer.WPF.Admin;
 using Quizzer.WPF.Models;
 
-namespace Quizzer.WPF.Quiz;
+namespace Quizzer.WPF.Screens.Quiz;
 
-public class MainViewModel : ObservableObject
-{
-    public AdministrationViewModel AdministrationViewModel { get; set; }
-    public QuizViewModel QuizViewModel { get; set; }
-    public RelayCommand LoadedCommand => new(Loaded);
-    public MainViewModel()
-    {
-        AdministrationViewModel = new(this);
-        QuizViewModel = new();
-    }
-    public void Loaded() => Debug.WriteLine($"I forget why I wanted this.");
-}
-
-public class QuizViewModel : ObservableObject
+[ObservableObject]
+public partial class QuizViewModel
 {
     private Question _currentQuestions = null!;
     public ObservableCollection<Question> Questions { get; set; } = new();

@@ -8,11 +8,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Models;
 using Quizzer.WPF.PromptTypes;
-using Quizzer.WPF.Quiz;
+using Quizzer.WPF.Screens.Main;
+using Quizzer.WPF.Screens.Quiz;
 
-namespace Quizzer.WPF.Admin;
+namespace Quizzer.WPF.Screens.Admin;
 
-public class AdministrationViewModel : ObservableObject
+[ObservableObject]
+public partial class AdministrationViewModel
 {
     public MainViewModel MainViewModel { get; }
     public RelayCommand SubmitAnswerCommand => new(LoadQuiz);
@@ -30,7 +32,7 @@ public class AdministrationViewModel : ObservableObject
         MainViewModel = mainViewModel;
         Prompts = new();
 
-        Quizzes = new() { "Clean", "Nasty" };
+        Quizzes = new() { "Clean", "Nasty" }; //ToDo: This should be an object of strings and other stuff. Not the way it is now.
         QuestionTypes = new();
         //ToDo: Figure out how to do this with just a Type, or maybe a Type and a colloquial name.
         QuestionTypes.Add(new() { Name = nameof(GuessTheLetterPrompt), Type = typeof(GuessTheLetterPromptViewModel) });

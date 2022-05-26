@@ -3,10 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Quizzer.WPF.Admin;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Processing;
+using Quizzer.WPF.Helpers;
+using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.WPF.PromptTypes;
 
@@ -36,17 +34,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         };
         if (openFileDialog.ShowDialog() != true) { return; }
         var bytes = File.ReadAllBytes(openFileDialog.FileName);
-
-        using var resized = new MemoryStream();
-        using var image = Image.Load(bytes);
-
-        var width = Math.Min(image.Width, 75);
-        var height = Math.Min(image.Height, 75);
-
-        image.Mutate(x => x.Resize(new ResizeOptions() { Mode = ResizeMode.Max, Size = new(width, height) }));
-        image.Save(resized, new PngEncoder());
-
-        _imageUri = Convert.ToBase64String(resized.ToArray());
+        _imageUri = ImageHelper.ImageToString(bytes);
         Debug.WriteLine(_imageUri);
     }
     public void GetModel()
@@ -54,7 +42,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         if (string.IsNullOrWhiteSpace(ShowText)) return;
         var t = new GuessTheLetterPrompt()
         {
-            ShowText = _showText,
+            ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             ImageURI = _imageUri,
             Type = Type,

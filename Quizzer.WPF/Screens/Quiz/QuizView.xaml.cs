@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Quizzer.WPF.Quiz
+namespace Quizzer.WPF.Screens.Quiz
 {
     /// <summary>
     /// Interaction logic for QuizView.xaml

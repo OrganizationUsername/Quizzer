@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Quizzer.WPF.Admin;
+namespace Quizzer.WPF.Screens.Admin;
 
 public class NameAndType
 {
