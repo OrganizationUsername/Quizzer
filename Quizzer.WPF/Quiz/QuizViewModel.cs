@@ -11,7 +11,7 @@ using Quizzer.WPF.Models;
 
 namespace Quizzer.WPF.Quiz;
 
-internal class MainViewModel : ObservableObject
+public class MainViewModel : ObservableObject
 {
     public AdministrationViewModel AdministrationViewModel { get; set; }
     public QuizViewModel QuizViewModel { get; set; }
@@ -24,7 +24,7 @@ internal class MainViewModel : ObservableObject
     public void Loaded() => Debug.WriteLine($"I forget why I wanted this.");
 }
 
-internal class QuizViewModel : ObservableObject
+public class QuizViewModel : ObservableObject
 {
     private Question _currentQuestions = null!;
     public ObservableCollection<Question> Questions { get; set; } = new();

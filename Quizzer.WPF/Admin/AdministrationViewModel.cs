@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ public class NameAndType
     public string Name { get; set; }
     public Type Type { get; set; }
 }
-internal class AdministrationViewModel : ObservableObject
+public class AdministrationViewModel : ObservableObject
 {
     public MainViewModel MainViewModel { get; }
     public RelayCommand SubmitAnswerCommand => new(LoadQuiz);
@@ -30,32 +31,36 @@ internal class AdministrationViewModel : ObservableObject
     public RelayCommand LoadedCommand => new(Loaded);
     private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
     private NameAndType _selectedQuestionType;
-    public Prompt NewPrompt { get; set; }
+    public IPromptViewModel PromptViewModel { get; set; }
+    public ObservableCollection<Prompt> Prompts { get; set; }
+    public AdministrationViewModel(MainViewModel mainViewModel)
+    {
+        MainViewModel = mainViewModel;
+        Prompts = new();
+
+        Quizzes = new() { "Clean", "Nasty" };
+        QuestionTypes = new();
+        QuestionTypes.Add(new() { Name = nameof(GuessTheLetterPrompt), Type = typeof(GuessTheLetterPromptViewModel) });
+        QuestionTypes.Add(new() { Name = nameof(TypeTheWordPrompt), Type = typeof(TypeTheWordPromptViewModel) });
+        SelectedQuestionType = QuestionTypes.First();
+    }
+
     public NameAndType SelectedQuestionType
     {
         get => _selectedQuestionType;
         set
         {
             _selectedQuestionType = value;
-            var type = Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == _selectedQuestionType.Name);
-            NewPrompt = (Prompt)Activator.CreateInstance(type)!;
-            OnPropertyChanged(nameof(NewPrompt));
+            var type = Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == _selectedQuestionType.Type.Name);
+            PromptViewModel = (IPromptViewModel)Activator.CreateInstance(type)!;
+            PromptViewModel.Administration = this;
+            OnPropertyChanged(nameof(PromptViewModel));
         }
     }
 
-    public AdministrationViewModel(MainViewModel mainViewModel)
-    {
-        MainViewModel = mainViewModel;
-        Quizzes = new() { "Clean", "Nasty" };
-        QuestionTypes = new();
-        QuestionTypes.Add(new() { Name = nameof(GuessTheLetterPrompt), Type = typeof(GuessTheLetterPrompt) });
-        QuestionTypes.Add(new() { Name = nameof(TypeTheWordPrompt), Type = typeof(TypeTheWordPrompt) });
-    }
 
-    public void Loaded()
-    {
-        if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); }
-    }
+
+    public void Loaded() { if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); } }
 
     public void SelectImage()
     {
