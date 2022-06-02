@@ -28,6 +28,7 @@ namespace Quizzer.WPF
             services.AddSingleton<PromptMessenger>();
             services.AddSingleton<AdministrationViewModel>();
             services.AddSingleton<QuizViewModel>();
+            services.AddSingleton<TypeTheWordPromptViewModel>();
             services.AddSingleton<GuessTheLetterPromptViewModel>();
             services.AddSingleton<MainViewModel>();
         }

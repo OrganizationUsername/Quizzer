@@ -42,11 +42,13 @@ public partial class QuizViewModel
     {
         if (CurrentQuestion is null) { return; }
         speechSynthesizer.Speak(CurrentQuestion.Prompt.ShowText);
+        //It can lock up here forever if you keep hitting it after everything's finished?
     }
 
     public void SubmitAnswer(string a)
     {
         Results.Add(a == CurrentQuestion?.Prompt.CorrectAnswer ? "Good!" : "Bad");
+        if (Questions.Count == 0) { return; }
         Questions.RemoveAt(0);
         if (Questions.Count == 0)
         {
