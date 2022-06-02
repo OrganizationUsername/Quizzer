@@ -8,9 +8,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Models;
 using Quizzer.WPF.PromptTypes;
-using Quizzer.WPF.Screens.Main;
 
 namespace Quizzer.WPF.Screens.Admin;
 
@@ -22,12 +22,6 @@ public partial class TempQuizViewModel
     [ObservableProperty] public ObservableCollection<Prompt> _prompts;
 
     public void sth() { }
-}
-
-public class QuestionsMessenger
-{
-    public event Action<List<Question>> QuestionsLoaded;
-    public void LoadQuestions(List<Question> product) => QuestionsLoaded?.Invoke(product); // `?` so if no subscribers, no NRE 
 }
 
 [ObservableObject]
@@ -42,13 +36,12 @@ public partial class AdministrationViewModel
     public RelayCommand GetJsonCommand => new(GetJsonOfQuestions);
     private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
     private NameAndType _selectedQuestionType = null!;
-    public IPromptViewModel PromptViewModel { get; set; } = null!;
+    [ObservableProperty] private IPromptViewModel? _promptViewModel;
     public ObservableCollection<Prompt> Prompts { get; set; }
     public QuestionsMessenger QuestionsMessenger { get; set; }
     public AdministrationViewModel(QuestionsMessenger questionsMessenger)
     {
         QuestionsMessenger = questionsMessenger;
-        //MainViewModel = mainViewModel;
         Prompts = new();
 
         Quizzes = new() { "Clean", "Nasty" }; //ToDo: This should be an object of strings and other stuff. Not the way it is now.
@@ -76,7 +69,6 @@ public partial class AdministrationViewModel
             var type = Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == _selectedQuestionType.Type!.Name);
             PromptViewModel = (IPromptViewModel)Activator.CreateInstance(type)!;
             PromptViewModel.Administration = this;
-            OnPropertyChanged(nameof(PromptViewModel));
         }
     }
 
@@ -85,29 +77,19 @@ public partial class AdministrationViewModel
     public void LoadQuiz()
     {
         if (SelectedQuiz is null) return;
-        //MainViewModel.QuizViewModel.Questions.Clear();
         List<Question> qs;
         switch (SelectedQuiz)
         {
             case "Clean":
                 qs = new(PromptService.GetCleanPrompts().Select(x => x.GenerateQuestion()));
-                QuestionsMessenger.LoadQuestions(qs);
-                //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
-                //ToDo: Use simple messaging to stop this really coupled stuff.
-                //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;
             case "Nasty":
                 qs = new(PromptService.GetDirtyPrompts().Select(x => x.GenerateQuestion()));
-                QuestionsMessenger.LoadQuestions(qs);
-                //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
-                //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;
             default:
                 qs = new(Prompts.Select(x => x.GenerateQuestion()));
-                QuestionsMessenger.LoadQuestions(qs);
-                //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
-                //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;
         }
+        QuestionsMessenger.LoadQuestions(qs);
     }
 }

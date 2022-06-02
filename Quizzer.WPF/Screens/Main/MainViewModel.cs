@@ -5,7 +5,6 @@ using Quizzer.WPF.Screens.Admin;
 using Quizzer.WPF.Screens.Quiz;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace Quizzer.WPF.Screens.Main;
 
 [ObservableObject]
@@ -16,11 +15,9 @@ public partial class MainViewModel
     public RelayCommand LoadedCommand => new(Loaded);
     public MainViewModel()
     {
+        //ToDo: Figure out how to get rid of this.
         _administrationViewModel = App.Current.Services.GetService<AdministrationViewModel>()!;
         _quizViewModel = App.Current.Services.GetService<QuizViewModel>()!;
     }
-    public void Loaded()
-    {
-        Debug.WriteLine($"I forget why I wanted this.");
-    }
+    public void Loaded() => Debug.WriteLine("I forget why I wanted this.");
 }

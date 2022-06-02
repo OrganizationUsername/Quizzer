@@ -6,8 +6,8 @@ using System.Speech.Synthesis;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Models;
-using Quizzer.WPF.Screens.Admin;
 
 
 namespace Quizzer.WPF.Screens.Quiz;
@@ -15,13 +15,14 @@ namespace Quizzer.WPF.Screens.Quiz;
 [ObservableObject]
 public partial class QuizViewModel
 {
-    private Question _currentQuestions = null!;
+    [ObservableProperty]
+    [AlsoNotifyCanExecuteFor(nameof(SpeakCommand))]
+    private Question? _currentQuestion;
     public ObservableCollection<Question> Questions { get; set; } = new();
-    public Question CurrentQuestions { get => _currentQuestions; set => SetProperty(ref _currentQuestions, value); }
     public List<string> Results { get; set; } = new();
     public RelayCommand<string> SubmitAnswerCommand => new(SubmitAnswer!);
     public RelayCommand SpeakCommand => new(Speak);
-    private readonly SpeechSynthesizer speechSynthesizer = new SpeechSynthesizer();
+    private readonly SpeechSynthesizer speechSynthesizer = new();
     private readonly QuestionsMessenger _questionsMessenger;
 
     public QuizViewModel(QuestionsMessenger questionsMessenger)
@@ -29,17 +30,23 @@ public partial class QuizViewModel
         _questionsMessenger = questionsMessenger;
         _questionsMessenger.QuestionsLoaded += ReceiveQuestions;
     }
+
     private void ReceiveQuestions(List<Question> products)
     {
+        Questions.Clear();
         foreach (var p in products) { Questions.Add(p); }
-        CurrentQuestions = Questions.First();
+        CurrentQuestion = Questions.First();
     }
 
-    public void Speak() => speechSynthesizer.Speak(CurrentQuestions.Prompt.ShowText);
+    public void Speak()
+    {
+        if (CurrentQuestion is null) { return; }
+        speechSynthesizer.Speak(CurrentQuestion.Prompt.ShowText);
+    }
 
     public void SubmitAnswer(string a)
     {
-        Results.Add(a == CurrentQuestions.Prompt.CorrectAnswer ? "Good!" : "Bad");
+        Results.Add(a == CurrentQuestion?.Prompt.CorrectAnswer ? "Good!" : "Bad");
         Questions.RemoveAt(0);
         if (Questions.Count == 0)
         {
@@ -47,7 +54,6 @@ public partial class QuizViewModel
             Results.Clear();
             return;
         }
-        CurrentQuestions = Questions.First();
-        OnPropertyChanged(nameof(CurrentQuestions.Prompt.MutilatedText));
+        CurrentQuestion = Questions.First();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Screens.Admin;
 using Quizzer.WPF.Screens.Main;
 using Quizzer.WPF.Screens.Quiz;
@@ -19,7 +20,7 @@ namespace Quizzer.WPF
             var services = new ServiceCollection();
             ConfigureServices(services);
             Services = services.BuildServiceProvider();
-            var x = new MainWindow() { DataContext = Services.GetService<MainViewModel>() };
+            var x = new MainWindow();//{ DataContext = Services.GetService<MainViewModel>() };
             x.Show();
         }
 
@@ -28,7 +29,7 @@ namespace Quizzer.WPF
             services.AddSingleton<QuestionsMessenger>();
             services.AddSingleton<AdministrationViewModel>();
             services.AddSingleton<QuizViewModel>();
-            services.AddSingleton<MainWindow>();
+            //services.AddSingleton<MainWindow>();
             services.AddSingleton<MainViewModel>();
         }
     }
