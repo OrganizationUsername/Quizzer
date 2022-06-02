@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:promptTypes="clr-namespace:Quizzer.WPF.PromptTypes"
+             xmlns:admin="clr-namespace:Quizzer.WPF.Screens.Admin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance admin:AdministrationViewModel}">

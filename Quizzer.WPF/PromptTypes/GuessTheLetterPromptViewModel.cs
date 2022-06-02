@@ -4,23 +4,22 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
-using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.WPF.PromptTypes;
 
-public interface IPromptViewModel
-{
-    public AdministrationViewModel Administration { get; set; }
-}
+public interface IPromptViewModel { }
 
 [ObservableObject]
 internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
 {
-    public AdministrationViewModel Administration { get; set; } = null!;
+    private readonly PromptMessenger _promptMessenger;
+
     [ObservableProperty] public string _showText = "";
     [ObservableProperty] public int _width = 150;
-    [ObservableProperty] public string? _imageUri = null;
+    [ObservableProperty] public string? _imageUri;
     public readonly string Type = "GuessTheLetterPrompt";
+
+    public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger) => _promptMessenger = promptMessenger;
 
     public RelayCommand GetModelCommand => new(GetModel);
     public RelayCommand SelectImageCommand => new(SelectImage);
@@ -40,14 +39,18 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     public void GetModel()
     {
         if (string.IsNullOrWhiteSpace(ShowText)) return;
-        var t = new GuessTheLetterPrompt()
+        _promptMessenger.LoadQuestions(new GuessTheLetterPrompt()
         {
             ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             ImageURI = _imageUri,
             Type = Type,
-        };
-        Administration.Prompts.Add(t);
+        });
+        ResetViewModel();
+    }
+
+    public void ResetViewModel()
+    {
         ShowText = "";
         Width = 150;
         _imageUri = null;

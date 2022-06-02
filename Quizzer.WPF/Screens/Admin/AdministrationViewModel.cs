@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -27,7 +26,7 @@ public partial class TempQuizViewModel
 [ObservableObject]
 public partial class AdministrationViewModel
 {
-    //public MainViewModel MainViewModel { get; }
+    private readonly PromptMessenger _promptMessenger;
     public RelayCommand SubmitAnswerCommand => new(LoadQuiz);
     public ObservableCollection<string> Quizzes { get; set; }
     public ObservableCollection<NameAndType> QuestionTypes { get; set; }
@@ -39,8 +38,11 @@ public partial class AdministrationViewModel
     [ObservableProperty] private IPromptViewModel? _promptViewModel;
     public ObservableCollection<Prompt> Prompts { get; set; }
     public QuestionsMessenger QuestionsMessenger { get; set; }
-    public AdministrationViewModel(QuestionsMessenger questionsMessenger)
+    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger)
     {
+        _promptMessenger = promptMessenger;
+        _promptMessenger.PromptLoaded += ReceivePrompt;
+
         QuestionsMessenger = questionsMessenger;
         Prompts = new();
 
@@ -51,6 +53,8 @@ public partial class AdministrationViewModel
         QuestionTypes.Add(new() { Name = nameof(TypeTheWordPrompt), Type = typeof(TypeTheWordPromptViewModel) });
         SelectedQuestionType = QuestionTypes.First();
     }
+
+    public void ReceivePrompt(Prompt p) => Prompts.Add(p);
 
     public void GetJsonOfQuestions()
     {
@@ -66,9 +70,7 @@ public partial class AdministrationViewModel
         set
         {
             _selectedQuestionType = value;
-            var type = Assembly.GetExecutingAssembly().GetTypes().First(t => t.Name == _selectedQuestionType.Type!.Name);
-            PromptViewModel = (IPromptViewModel)Activator.CreateInstance(type)!;
-            PromptViewModel.Administration = this;
+            PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
         }
     }
 
