@@ -26,8 +26,8 @@ public partial class TempQuizViewModel
 
 public class QuestionsMessenger
 {
-    public event Action<List<Question>> ProductCreated;
-    public void LoadQuestions(List<Question> product) => ProductCreated?.Invoke(product); // `?` so if no subscribers, no NRE 
+    public event Action<List<Question>> QuestionsLoaded;
+    public void LoadQuestions(List<Question> product) => QuestionsLoaded?.Invoke(product); // `?` so if no subscribers, no NRE 
 }
 
 [ObservableObject]
@@ -91,17 +91,20 @@ public partial class AdministrationViewModel
         {
             case "Clean":
                 qs = new(PromptService.GetCleanPrompts().Select(x => x.GenerateQuestion()));
+                QuestionsMessenger.LoadQuestions(qs);
                 //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
                 //ToDo: Use simple messaging to stop this really coupled stuff.
                 //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;
             case "Nasty":
-                //qs = new(PromptService.GetDirtyPrompts().Select(x => x.GenerateQuestion()));
+                qs = new(PromptService.GetDirtyPrompts().Select(x => x.GenerateQuestion()));
+                QuestionsMessenger.LoadQuestions(qs);
                 //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
                 //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;
             default:
-                //qs = new(Prompts.Select(x => x.GenerateQuestion()));
+                qs = new(Prompts.Select(x => x.GenerateQuestion()));
+                QuestionsMessenger.LoadQuestions(qs);
                 //foreach (var question in qs) { MainViewModel.QuizViewModel.Questions.Add(question); }
                 //MainViewModel.QuizViewModel.CurrentQuestions = MainViewModel.QuizViewModel.Questions.First();
                 break;

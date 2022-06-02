@@ -7,6 +7,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Models;
+using Quizzer.WPF.Screens.Admin;
 
 
 namespace Quizzer.WPF.Screens.Quiz;
@@ -21,12 +22,17 @@ public partial class QuizViewModel
     public RelayCommand<string> SubmitAnswerCommand => new(SubmitAnswer!);
     public RelayCommand SpeakCommand => new(Speak);
     private readonly SpeechSynthesizer speechSynthesizer = new SpeechSynthesizer();
+    private readonly QuestionsMessenger _questionsMessenger;
 
-    public QuizViewModel()
+    public QuizViewModel(QuestionsMessenger questionsMessenger)
     {
-        //var qs = new ObservableCollection<Question>(PromptService.GetCleanPrompts().Select(x => x.GenerateQuestion()));
-        //foreach (var question in qs) { QuestionTypes.Add(question); }
-        //CurrentQuestions = QuestionTypes.First();
+        _questionsMessenger = questionsMessenger;
+        _questionsMessenger.QuestionsLoaded += ReceiveQuestions;
+    }
+    private void ReceiveQuestions(List<Question> products)
+    {
+        foreach (var p in products) { Questions.Add(p); }
+        CurrentQuestions = Questions.First();
     }
 
     public void Speak() => speechSynthesizer.Speak(CurrentQuestions.Prompt.ShowText);
