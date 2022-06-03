@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Screens.Admin;
 
@@ -9,28 +10,26 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
 {
     private readonly PromptMessenger _promptMessenger;
 
-    public AdministrationViewModel Administration { get; set; } = null!;
     [ObservableProperty] public string _showText = "";
     [ObservableProperty] public int _width = 150;
     [ObservableProperty] public string? _imageUri = null;
     public readonly string Type = "TypeTheWordPrompt";
-
-    public TypeTheWordPromptViewModel(PromptMessenger promptMessenger)
-    {
-        _promptMessenger = promptMessenger;
-    }
+    public RelayCommand GetModelCommand => new(GetModel);
+    public TypeTheWordPromptViewModel(PromptMessenger promptMessenger) { _promptMessenger = promptMessenger; }
 
     public void GetModel()
     {
-        if (_imageUri is null || string.IsNullOrWhiteSpace(ShowText)) { return; }
-        var t = new GuessTheLetterPrompt()
+        if (string.IsNullOrWhiteSpace(ShowText)) { return; }
+        _promptMessenger.LoadQuestions(new TypeTheWordPrompt()
         {
             ShowText = _showText.ToUpperInvariant(),
             Width = _width,
-            ImageURI = _imageUri,
             Type = Type,
-        };
-        Administration.Prompts.Add(t);
+        });
+        ResetViewModel();
+    }
+    public void ResetViewModel()
+    {
         ShowText = "";
         Width = 150;
         _imageUri = null;

@@ -40,7 +40,7 @@
         <StackPanel Grid.Column="1" Grid.Row="0">
             <DockPanel >
                 <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
-                <TextBox HorizontalAlignment="Stretch"/>
+                <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName}"/>
             </DockPanel>
             <Button Content="Create new Quiz"/>
             <Button Content="Add question"/>

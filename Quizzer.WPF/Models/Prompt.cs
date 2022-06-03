@@ -10,6 +10,7 @@ I guess for some types of Prompts, I should be able to directly transfer them to
 Kind of pad the number of questions by making them in other forms.
  */
 
+/* Prompts still don't have defined answers. */
 public abstract class Prompt
 {
     public string ShowText { get; set; }

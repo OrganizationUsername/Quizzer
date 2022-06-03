@@ -16,7 +16,7 @@
         <TextBox Text="{Binding ShowText}"/>
         <TextBox Text="{Binding Width}"/>
         <Button Content="Add Question" Command="{Binding GetModelCommand}"/>
-        <Button Content="SelectImage" Command="{Binding SelectImageCommand}" Grid.Column="0" Grid.Row="1"/>
+        <Button Content="SelectImage" Command="{Binding SelectImageCommand}"/>
         <Image Width="75" Height="75" Source="{Binding  ImageUri, Converter={StaticResource Base64ImageConverter}}"/>
     </StackPanel>
 </UserControl>
