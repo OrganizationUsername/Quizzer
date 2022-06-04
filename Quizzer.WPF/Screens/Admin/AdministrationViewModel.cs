@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -37,7 +36,7 @@ public partial class AdministrationViewModel
     [ICommand] private void ShowTextBox() => MessageBox.Show("Hello!");
     public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName);
     [ObservableProperty] private string _newQuizName = "";
-    partial void OnNewQuizNameChanged(string quizName) => GetJsonCommand.NotifyCanExecuteChanged();
+    partial void OnNewQuizNameChanged(string value) => GetJsonCommand.NotifyCanExecuteChanged();
 
     [ObservableProperty] private IPromptViewModel? _promptViewModel;
     [ObservableProperty] private ObservableCollection<Prompt> _prompts = null!;
@@ -59,22 +58,12 @@ public partial class AdministrationViewModel
         SelectedQuestionType = QuestionTypes.First();
     }
 
-    private NameAndType _selectedQuestionType = null!;
-    public NameAndType SelectedQuestionType
-    {
-        get => _selectedQuestionType;
-        set { _selectedQuestionType = value; PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type); }
-    }
-
-    //partial void OnSelectedQuestionTypeChanged(NameAndType nameAndType)
-    //{
-    //    PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
-    //}
+    [ObservableProperty] private NameAndType _selectedQuestionType = null!;
+    partial void OnSelectedQuestionTypeChanged(NameAndType value) =>  PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
 
     public void ReceivePrompt(Prompt p) => Prompts.Add(p);
 
-    [ICommand(CanExecute = nameof(CanExecuteThing))]
-    public void GetJson()
+    [ICommand(CanExecute = nameof(CanExecuteThing))] public void GetJson()
     {
         //If the new quiz name is blank, return
         //If they select a quiz, I should change the questions that are shown.
@@ -93,7 +82,8 @@ public partial class AdministrationViewModel
 
         Console.WriteLine(serialized);
 
-        Debug.WriteLine(text);
+        Debug.WriteLine(serialized);
+        //Debug.WriteLine(text);
         Quizzes.Add(Quizzes.Count.ToString());
     }
     [ICommand] public void Loaded() { if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); } }
