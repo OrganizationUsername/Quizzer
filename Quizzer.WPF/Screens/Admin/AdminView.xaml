@@ -9,6 +9,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance admin:AdministrationViewModel}">
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding ShowTextBoxCommand}" Key="O" Modifiers="Ctrl+Shift"/>
+    </UserControl.InputBindings>
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type promptTypes:GuessTheLetterPromptViewModel}">
             <promptTypes:GuessTheLetterPromptView/>
@@ -22,34 +25,41 @@
             <b:InvokeCommandAction Command="{Binding LoadedCommand}" />
         </b:EventTrigger>
     </b:Interaction.Triggers>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
-            <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" SelectedItem="{Binding SelectedQuiz}"/>
-            <Button Command="{Binding SubmitAnswerCommand}" Content="Select Quiz"/>
-        </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="0">
-            <DockPanel >
-                <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
-                <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName}"/>
-            </DockPanel>
-            <Button Content="Create new Quiz"/>
-            <Button Content="Add question"/>
-            <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
-            <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
-            <Button Content="Json" Command="{Binding GetJsonCommand}"/>
-        </StackPanel>
-        <StackPanel Grid.Column="2" Grid.Row="0">
-            <ContentControl  Content="{Binding PromptViewModel}" />
-        </StackPanel>
-    </Grid>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Text" Command="{Binding ShowTextBoxCommand}" InputGestureText="asdf" />
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
+                <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" SelectedItem="{Binding SelectedQuiz}"/>
+                <Button Command="{Binding SubmitAnswerCommand}" Content="Select Quiz"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Grid.Row="0">
+                <DockPanel >
+                    <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
+                    <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName}"/>
+                </DockPanel>
+                <Button Content="Create new Quiz"/>
+                <Button Content="Add question"/>
+                <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
+                <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
+                <Button Content="Json" Command="{Binding GetJsonCommand}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Grid.Row="0">
+                <ContentControl  Content="{Binding PromptViewModel}" />
+            </StackPanel>
+        </Grid>
+    </DockPanel>
 </UserControl>

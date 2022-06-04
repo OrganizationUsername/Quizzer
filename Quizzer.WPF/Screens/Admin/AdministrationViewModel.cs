@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
@@ -29,24 +30,24 @@ public partial class TempQuizViewModel
 public partial class AdministrationViewModel
 {
     private readonly PromptMessenger _promptMessenger;
-    public RelayCommand SubmitAnswerCommand => new(LoadQuiz);
     public ObservableCollection<string> Quizzes { get; set; }
     public ObservableCollection<NameAndType> QuestionTypes { get; set; }
     public string? SelectedQuiz { get; set; }
-    public RelayCommand LoadedCommand => new(Loaded);
-    public IRelayCommand GetJsonCommand => new RelayCommand(GetJsonOfQuestions, () => !string.IsNullOrWhiteSpace(_newQuizName));
     private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
+    [ICommand] private void ShowTextBox() => MessageBox.Show("Hello!");
+    public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName);
+    [ObservableProperty] private string _newQuizName = "";
+    partial void OnNewQuizNameChanged(string quizName) => GetJsonCommand.NotifyCanExecuteChanged();
 
     [ObservableProperty] private IPromptViewModel? _promptViewModel;
-    public ObservableCollection<Prompt> Prompts { get; set; }
+    [ObservableProperty] private ObservableCollection<Prompt> _prompts = null!;
     public QuestionsMessenger QuestionsMessenger { get; set; }
-    [AlsoNotifyChangeFor(nameof(GetJsonCommand))]
-    [ObservableProperty] private string _newQuizName = "";
+
     public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger)
     {
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptLoaded += ReceivePrompt;
-        if (nameof(_promptMessenger) == "_promptMessenger") _ = 1;
+        
 
         QuestionsMessenger = questionsMessenger;
         Prompts = new();
@@ -65,14 +66,20 @@ public partial class AdministrationViewModel
         set { _selectedQuestionType = value; PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type); }
     }
 
+    //partial void OnSelectedQuestionTypeChanged(NameAndType nameAndType)
+    //{
+    //    PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
+    //}
+
     public void ReceivePrompt(Prompt p) => Prompts.Add(p);
 
-    public void GetJsonOfQuestions()
+    [ICommand(CanExecute = nameof(CanExecuteThing))]
+    public void GetJson()
     {
         //If the new quiz name is blank, return
         //If they select a quiz, I should change the questions that are shown.
-        var text = System.Text.Json.JsonSerializer.Serialize(Prompts);
-
+        var text = JsonSerializer.Serialize(Prompts);
+        if (nameof(_promptMessenger) == "_promptMessenger") _ = 1;
         var result = new PromptCollection()
         {
             GuessTheLetterPrompts = Prompts.Where(x => x.GetType().Name == "GuessTheLetterPrompt").Cast<GuessTheLetterPrompt>().ToList(),
@@ -82,20 +89,17 @@ public partial class AdministrationViewModel
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
-        var serialized = System.Text.Json.JsonSerializer.Serialize(result, options);
+        var serialized = JsonSerializer.Serialize(result, options);
 
         Console.WriteLine(serialized);
 
         Debug.WriteLine(text);
         Quizzes.Add(Quizzes.Count.ToString());
     }
-    public void Loaded()
-    {
-        if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); }
-        /* Get existing questions there. */
-    }
+    [ICommand] public void Loaded() { if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); } }
 
-    public void LoadQuiz()
+    [ICommand]
+    public void SubmitAnswer()
     {
         if (SelectedQuiz is null) return;
         List<Question> qs;
