@@ -15,11 +15,9 @@ namespace Quizzer.WPF.Screens.Quiz;
 [ObservableObject]
 public partial class QuizViewModel
 {
-    [ObservableProperty]
-    [AlsoNotifyCanExecuteFor(nameof(SpeakCommand))]
-    private Question? _currentQuestion;
+    [AlsoNotifyCanExecuteFor(nameof(SpeakCommand))][ObservableProperty] private Question? _currentQuestion;
     public ObservableCollection<Question> Questions { get; set; } = new();
-    public List<string> Results { get; set; } = new();
+    private List<string> Results { get; } = new();
     public RelayCommand<string> SubmitAnswerCommand => new(SubmitAnswer!);
     public RelayCommand SpeakCommand => new(Speak);
     private readonly SpeechSynthesizer speechSynthesizer = new();
@@ -35,7 +33,8 @@ public partial class QuizViewModel
     {
         Questions.Clear();
         foreach (var p in products) { Questions.Add(p); }
-        CurrentQuestion = Questions.First();
+
+        CurrentQuestion = Questions.FirstOrDefault();
     }
 
     public void Speak()
@@ -56,6 +55,6 @@ public partial class QuizViewModel
             Results.Clear();
             return;
         }
-        CurrentQuestion = Questions.First();
+        CurrentQuestion = Questions.FirstOrDefault();
     }
 }

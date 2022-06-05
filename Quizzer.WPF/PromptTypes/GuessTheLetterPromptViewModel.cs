@@ -44,6 +44,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
             ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             Type = Type,
+            ImageURI = _imageUri
         });
         ResetViewModel();
     }

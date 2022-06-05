@@ -44,15 +44,13 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
                 <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" SelectedItem="{Binding SelectedQuiz}"/>
-                <Button Command="{Binding SubmitAnswerCommand}" Content="Select Quiz"/>
+                <Button Command="{Binding SetQuizCommand}" Content="Select Quiz"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Grid.Row="0">
                 <DockPanel >
                     <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
-                    <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName}"/>
+                    <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName, UpdateSourceTrigger=PropertyChanged}"/>
                 </DockPanel>
-                <Button Content="Create new Quiz"/>
-                <Button Content="Add question"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
                 <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
                 <Button Content="Json" Command="{Binding GetJsonCommand}"/>

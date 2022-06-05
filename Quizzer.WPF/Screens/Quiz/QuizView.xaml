@@ -31,7 +31,6 @@
                                     CommandParameter="{Binding Text}">
                                 <TextBlock Text="{Binding Text}" Margin="10" FontWeight="Bold"/>
                             </Button>
-
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -41,7 +40,6 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
-            
         </StackPanel>
     </ScrollViewer>
 </UserControl>
