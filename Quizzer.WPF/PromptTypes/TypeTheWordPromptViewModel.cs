@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
+using Quizzer.WPF.Models;
 using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.WPF.PromptTypes;
@@ -16,7 +17,21 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
     [ObservableProperty] public string? _imageUri = null;
     public readonly string Type = "TypeTheWordPrompt";
     public RelayCommand GetModelCommand => new(GetModel);
-    public TypeTheWordPromptViewModel(PromptMessenger promptMessenger) { _promptMessenger = promptMessenger; }
+    private Guid _guid;
+
+    public TypeTheWordPromptViewModel(PromptMessenger promptMessenger)
+    {
+        _promptMessenger = promptMessenger;
+        _promptMessenger.PromptPassed += UpdatePrompt;
+        _guid = Guid.NewGuid();
+    }
+
+    private void UpdatePrompt(Prompt p)
+    {
+        ShowText = p.ShowText;
+        Width = p.Width;
+        _guid = p.PromptId;
+    }
 
     public void GetModel()
     {
@@ -26,7 +41,7 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
             ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             Type = Type,
-            PromptId = Guid.NewGuid(),
+            PromptId = _guid,
         });
         ResetViewModel();
     }
@@ -35,5 +50,6 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
         ShowText = "";
         Width = 150;
         _imageUri = null;
+        _guid = Guid.NewGuid();
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
+using Quizzer.WPF.Models;
 
 namespace Quizzer.WPF.PromptTypes;
 
@@ -18,8 +19,22 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     [ObservableProperty] public int _width = 150;
     [ObservableProperty] public string? _imageUri;
     public readonly string Type = "GuessTheLetterPrompt";
+    private Guid _guid;
 
-    public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger) => _promptMessenger = promptMessenger;
+    public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger)
+    {
+        _promptMessenger = promptMessenger;
+        _promptMessenger.PromptPassed += UpdatePrompt;
+        _guid = Guid.NewGuid();
+    }
+
+    private void UpdatePrompt(Prompt p)
+    {
+        ShowText = p.ShowText;
+        Width = p.Width;
+        _guid = p.PromptId;
+        ImageUri = p.ImageURI;
+    }
 
     public RelayCommand GetModelCommand => new(GetModel);
     public RelayCommand SelectImageCommand => new(SelectImage);
@@ -55,5 +70,6 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         ShowText = "";
         Width = 150;
         _imageUri = null;
+        _guid = Guid.NewGuid();
     }
 }

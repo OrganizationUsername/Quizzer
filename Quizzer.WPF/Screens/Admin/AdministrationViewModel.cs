@@ -58,6 +58,8 @@ public partial class AdministrationViewModel
         if (value is null) { return; }
         Debug.WriteLine($"It was not null! {value.ShowText} of type {value.Type}");
         SelectedQuestionType = QuestionTypes.First(x => x.Name == value.Type);
+        _promptMessenger.PassPrompt(value);
+        //ToDo: Use messenger here to pass existing prompt information 
     }
 
     public void ReceivePrompt(Prompt p)
