@@ -53,6 +53,18 @@ public partial class AdministrationViewModel
 
     public void ReceivePrompt(Prompt p) => Prompts.Add(p);
 
+    //ToDo: Make it so when the selected saved PromptsCollection changes and it's not null, then you can't change the name?
+    //I'd like it so I could add questions to existing things. Maybe even add/change images.
+
+    [ICommand]
+    public void CreateNewPromptCollection()
+    {
+        Prompts.Clear();
+
+    }
+
+
+
     [ICommand(CanExecute = nameof(CanExecuteThing))]
     public void GetJson()
     {
@@ -75,6 +87,7 @@ public partial class AdministrationViewModel
         File.WriteAllText(Path.Combine(_directory, $"{_newQuizName}.prompts"), serialized);
 
         Debug.WriteLine(serialized);
+        Prompts.Clear();
         Quizzes.Add(_newQuizName);
     }
 

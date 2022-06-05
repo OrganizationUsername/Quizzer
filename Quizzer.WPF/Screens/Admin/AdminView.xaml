@@ -51,6 +51,7 @@
                     <Label Content="New Quiz Name: " DockPanel.Dock="Left"/>
                     <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName, UpdateSourceTrigger=PropertyChanged}"/>
                 </DockPanel>
+                <Button Content="Create New Prompt Collection" Command="{Binding CreateNewPromptCollectionCommand}"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
                 <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
                 <Button Content="Json" Command="{Binding GetJsonCommand}"/>
