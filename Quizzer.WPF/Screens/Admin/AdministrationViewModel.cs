@@ -24,7 +24,7 @@ public partial class AdministrationViewModel
     [ObservableProperty] private string? _selectedQuiz;
     private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
     [ICommand] private void ShowTextBox() => MessageBox.Show("Hello!");
-    public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName) && !existingPromptsCollectionNamesLower.Contains(_newQuizName.ToLower()); //For this reason, I should have a HashSet of PromptCollection names.
+    public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName) && SelectedQuiz == _newQuizName || !existingPromptsCollectionNamesLower.Contains(_newQuizName.ToLower()); //For this reason, I should have a HashSet of PromptCollection names.
     [ObservableProperty] private string _newQuizName = "";
     partial void OnNewQuizNameChanged(string value) => GetJsonCommand.NotifyCanExecuteChanged();
     private HashSet<string> existingPromptsCollectionNames = new();
@@ -85,6 +85,8 @@ public partial class AdministrationViewModel
         Prompts.Clear();
         if (prompts?.GuessTheLetterPrompts != null) { foreach (var prompt in prompts.GuessTheLetterPrompts) { Prompts.Add(prompt); } }
         if (prompts?.TypeTheWordPrompts != null) { foreach (var prompt in prompts.TypeTheWordPrompts) { Prompts.Add(prompt); } }
+
+        NewQuizName = value;
     }
 
     //ToDo: Make it so when the selected saved PromptsCollection changes and it's not null, then you can't change the name?
@@ -124,7 +126,12 @@ public partial class AdministrationViewModel
 
         Debug.WriteLine(serialized);
         Prompts.Clear();
-        Quizzes.Add(_newQuizName);
+        if (!existingPromptsCollectionNames.Contains(_newQuizName) && !existingPromptsCollectionNamesLower.Contains(_newQuizName))
+        {
+            existingPromptsCollectionNames.Add(_newQuizName);
+            existingPromptsCollectionNamesLower.Add(_newQuizName);
+            Quizzes.Add(_newQuizName);
+        }
         CanSelectQuiz = true;
     }
 
