@@ -54,7 +54,7 @@
                 <Button Content="Create New Prompt Collection" Command="{Binding CreateNewPromptCollectionCommand}"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
                 <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SelectedPrompt}" />
-                <Button Content="Save" Command="{Binding GetJsonCommand}"/>
+                <Button Content="{Binding SaveUpdateText}" Command="{Binding GetJsonCommand}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Grid.Row="0">
                 <ContentControl Content="{Binding PromptViewModel}" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -59,7 +60,6 @@ public partial class AdministrationViewModel
         Debug.WriteLine($"It was not null! {value.ShowText} of type {value.Type}");
         SelectedQuestionType = QuestionTypes.First(x => x.Name == value.Type);
         _promptMessenger.PassPrompt(value);
-        //ToDo: Use messenger here to pass existing prompt information 
     }
 
     public void ReceivePrompt(Prompt p)
@@ -67,10 +67,11 @@ public partial class AdministrationViewModel
         var existingPrompt = Prompts.FirstOrDefault(x => x.PromptId == p.PromptId);
         if (existingPrompt is not null)
         {
-            //Copy all of `p` onto the one we found.
+            existingPrompt.ShowText = p.ShowText;
+            existingPrompt.ImageURI = p.ImageURI;
+            existingPrompt.Width = p.Width;
             return;
         }
-
         Prompts.Add(p);
     }
 
@@ -99,7 +100,6 @@ public partial class AdministrationViewModel
     {
         _selectedQuiz = null;
         CanSelectQuiz = false;
-
         Prompts.Clear();
     }
 
@@ -120,7 +120,7 @@ public partial class AdministrationViewModel
             GuessTheLetterPrompts = Prompts.Where(x => x.GetType().Name == "GuessTheLetterPrompt").Cast<GuessTheLetterPrompt>().ToList(),
             TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
         };
-        var serialized = JsonSerializer.Serialize(result, new JsonSerializerOptions() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+        var serialized = JsonSerializer.Serialize(result, new JsonSerializerOptions() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true });
 
         File.WriteAllText(Path.Combine(_directory, $"{_newQuizName}.prompts"), serialized);
 

@@ -18,6 +18,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     [ObservableProperty] public string _showText = "";
     [ObservableProperty] public int _width = 150;
     [ObservableProperty] public string? _imageUri;
+    [ObservableProperty] private string _saveUpdateText = "Save Prompt";
     public readonly string Type = "GuessTheLetterPrompt";
     private Guid _guid;
 
@@ -34,6 +35,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         Width = p.Width;
         _guid = p.PromptId;
         ImageUri = p.ImageURI;
+        SaveUpdateText = "Update Prompt";
     }
 
     public RelayCommand GetModelCommand => new(GetModel);
@@ -60,7 +62,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
             Width = _width,
             Type = Type,
             ImageURI = _imageUri,
-            PromptId = Guid.NewGuid(),
+            PromptId = _guid,
         });
         ResetViewModel();
     }
@@ -71,5 +73,6 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         Width = 150;
         _imageUri = null;
         _guid = Guid.NewGuid();
+        _saveUpdateText = "Save Prompt";
     }
 }
