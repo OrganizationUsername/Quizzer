@@ -2,7 +2,7 @@
 using Quizzer.WPF.Models;
 using Quizzer.WPF.PromptTypes;
 
-namespace Quizzer.WPF;
+namespace Quizzer.WPF.Helpers;
 
 public static class PromptService
 {
