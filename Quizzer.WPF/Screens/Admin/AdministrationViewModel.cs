@@ -51,19 +51,53 @@ public partial class AdministrationViewModel
     [ObservableProperty] private NameAndType _selectedQuestionType = null!;
     partial void OnSelectedQuestionTypeChanged(NameAndType value) => PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
 
-    public void ReceivePrompt(Prompt p) => Prompts.Add(p);
+    [ObservableProperty] private Prompt? _selectedPrompt;
+
+    partial void OnSelectedPromptChanged(Prompt? value)
+    {
+        if (value is null) { return; }
+        Debug.WriteLine($"It was not null! {value.ShowText} of type {value.Type}");
+        SelectedQuestionType = QuestionTypes.First(x => x.Name == value.Type);
+    }
+
+    public void ReceivePrompt(Prompt p)
+    {
+        var existingPrompt = Prompts.FirstOrDefault(x => x.PromptId == p.PromptId);
+        if (existingPrompt is not null)
+        {
+            //Copy all of `p` onto the one we found.
+            return;
+        }
+
+        Prompts.Add(p);
+    }
+
+    partial void OnSelectedQuizChanged(string? value)
+    {
+        Debug.WriteLine($"Do something.");
+        if (value is null) { return; }
+
+        var prompts = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(Path.Combine(_directory, $"{value}.prompts")));
+        if (prompts is null) { return; }
+
+        Prompts.Clear();
+        if (prompts?.GuessTheLetterPrompts != null) { foreach (var prompt in prompts.GuessTheLetterPrompts) { Prompts.Add(prompt); } }
+        if (prompts?.TypeTheWordPrompts != null) { foreach (var prompt in prompts.TypeTheWordPrompts) { Prompts.Add(prompt); } }
+    }
 
     //ToDo: Make it so when the selected saved PromptsCollection changes and it's not null, then you can't change the name?
     //I'd like it so I could add questions to existing things. Maybe even add/change images.
 
+    [ObservableProperty] private bool _canSelectQuiz = true;
+
     [ICommand]
     public void CreateNewPromptCollection()
     {
+        _selectedQuiz = null;
+        CanSelectQuiz = false;
+
         Prompts.Clear();
-
     }
-
-
 
     [ICommand(CanExecute = nameof(CanExecuteThing))]
     public void GetJson()
@@ -89,6 +123,7 @@ public partial class AdministrationViewModel
         Debug.WriteLine(serialized);
         Prompts.Clear();
         Quizzes.Add(_newQuizName);
+        CanSelectQuiz = true;
     }
 
     [ICommand]
@@ -129,8 +164,7 @@ public partial class AdministrationViewModel
                 var result = new PromptCollection()
                 {
                     GuessTheLetterPrompts = PromptService.GetCleanPrompts().Cast<GuessTheLetterPrompt>().ToList(),
-                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt")
-                        .Cast<TypeTheWordPrompt>().ToList(),
+                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
                 };
                 var serialized = JsonSerializer.Serialize(result, options);
                 File.WriteAllText(cleanPath, serialized);
@@ -142,8 +176,7 @@ public partial class AdministrationViewModel
                 var result = new PromptCollection()
                 {
                     GuessTheLetterPrompts = PromptService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(),
-                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt")
-                        .Cast<TypeTheWordPrompt>().ToList(),
+                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
                 };
                 var serialized = JsonSerializer.Serialize(result, options);
                 File.WriteAllText(dirtyPath, serialized);

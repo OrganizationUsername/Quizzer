@@ -43,7 +43,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
-                <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" SelectedItem="{Binding SelectedQuiz}"/>
+                <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" IsSynchronizedWithCurrentItem="True" SelectedValue="{Binding SelectedQuiz}" IsEnabled="{Binding CanSelectQuiz}"/>
                 <Button Command="{Binding SetQuizCommand}" Content="Select Quiz"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Grid.Row="0">
@@ -53,7 +53,7 @@
                 </DockPanel>
                 <Button Content="Create New Prompt Collection" Command="{Binding CreateNewPromptCollectionCommand}"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
-                <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText"/>
+                <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SelectedPrompt}" />
                 <Button Content="Json" Command="{Binding GetJsonCommand}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Grid.Row="0">

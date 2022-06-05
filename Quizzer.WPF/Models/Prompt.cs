@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+using System;
 using System.Collections.Generic;
 
 namespace Quizzer.WPF.Models;
@@ -13,6 +14,7 @@ Kind of pad the number of questions by making them in other forms.
 /* Prompts still don't have defined answers. */
 public abstract class Prompt
 {
+    public Guid PromptId { get; set; }
     public string ShowText { get; set; }
     public string MutilatedText { get; set; } /*only in `GTLPrompt`? */
     public string? ImageURI { get; set; }

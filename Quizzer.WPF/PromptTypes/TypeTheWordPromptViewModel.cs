@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Screens.Admin;
@@ -25,6 +26,7 @@ internal partial class TypeTheWordPromptViewModel : IPromptViewModel
             ShowText = _showText.ToUpperInvariant(),
             Width = _width,
             Type = Type,
+            PromptId = Guid.NewGuid(),
         });
         ResetViewModel();
     }
