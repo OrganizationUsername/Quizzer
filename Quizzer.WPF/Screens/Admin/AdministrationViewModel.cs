@@ -61,6 +61,7 @@ public partial class AdministrationViewModel
         SelectedQuestionType = QuestionTypes.First(x => x.Name == value.Type);
         _promptMessenger.PassPrompt(value);
     }
+    [ICommand] public void PassNull() => _promptMessenger.NullPrompt();
 
     public void ReceivePrompt(Prompt p)
     {
@@ -79,7 +80,6 @@ public partial class AdministrationViewModel
     {
         Debug.WriteLine($"Do something.");
         if (value is null) { return; }
-
         var prompts = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(Path.Combine(_directory, $"{value}.prompts")));
         if (prompts is null) { return; }
 
@@ -94,6 +94,14 @@ public partial class AdministrationViewModel
     //I'd like it so I could add questions to existing things. Maybe even add/change images.
 
     [ObservableProperty] private bool _canSelectQuiz = true;
+
+    [ICommand]
+    public void DeleteSelectedQuestion()
+    {
+        var promptToDelete = Prompts.FirstOrDefault(x => x.PromptId == SelectedPrompt.PromptId);
+        if (promptToDelete is null) { return; }
+        Prompts.Remove(promptToDelete);
+    }
 
     [ICommand]
     public void CreateNewPromptCollection()

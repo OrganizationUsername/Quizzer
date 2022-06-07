@@ -26,6 +26,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     {
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptPassed += UpdatePrompt;
+        _promptMessenger.PromptNulled += ResetViewModel;
         _guid = Guid.NewGuid();
     }
 

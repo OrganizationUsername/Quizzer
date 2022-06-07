@@ -52,9 +52,11 @@
                     <TextBox HorizontalAlignment="Stretch" Text="{Binding NewQuizName, UpdateSourceTrigger=PropertyChanged}"/>
                 </DockPanel>
                 <Button Content="Create New Prompt Collection" Command="{Binding CreateNewPromptCollectionCommand}"/>
+                <Button Content="Add Question" Command="{Binding PassNullCommand}"/>
+                <Button Content="Delete Selected Question" Command="{Binding DeleteSelectedQuestionCommand}"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
                 <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SelectedPrompt}" />
-                <Button Content="{Binding SaveUpdateText}" Command="{Binding GetJsonCommand}"/>
+                <Button Content="Save Prompt Collection" Command="{Binding GetJsonCommand}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Grid.Row="0">
                 <ContentControl Content="{Binding PromptViewModel}" />

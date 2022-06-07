@@ -14,6 +14,8 @@ public class PromptMessenger
 {
     public event Action<Prompt>? PromptLoaded;
     public event Action<Prompt>? PromptPassed;
-    public void PassPrompt(Prompt product) => PromptPassed?.Invoke(product); // `?` so if no subscribers, no NRE 
+    public event Action? PromptNulled;
+    public void NullPrompt() => PromptNulled?.Invoke();
+    public void PassPrompt(Prompt product) => PromptPassed?.Invoke(product);
     public void LoadQuestions(Prompt product) => PromptLoaded?.Invoke(product); // `?` so if no subscribers, no NRE 
 }
