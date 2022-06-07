@@ -14,14 +14,15 @@ public interface IPromptViewModel { }
 internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
 {
     private readonly PromptMessenger _promptMessenger;
-
     [ObservableProperty] public string _showText = "";
     [ObservableProperty] public int _width = 150;
     [ObservableProperty] public string? _imageUri;
     [ObservableProperty] private string _saveUpdateText = "Save Prompt";
+    private const string savePromptString = "Save Prompt";
+    private const string updatePromptString = "Update Prompt";
     public readonly string Type = "GuessTheLetterPrompt";
     private Guid _guid;
-
+    private string lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger)
     {
         _promptMessenger = promptMessenger;
@@ -36,7 +37,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         Width = p.Width;
         _guid = p.PromptId;
         ImageUri = p.ImageURI;
-        SaveUpdateText = "Update Prompt";
+        SaveUpdateText = updatePromptString;
     }
 
     public RelayCommand GetModelCommand => new(GetModel);
@@ -46,12 +47,14 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         var openFileDialog = new Microsoft.Win32.OpenFileDialog()
         {
             DefaultExt = "png",
-            InitialDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
+            InitialDirectory = lastDirectory,
             Filter = "png file | *.png"
         };
         if (openFileDialog.ShowDialog() != true) { return; }
+
+        lastDirectory = Path.GetFullPath(openFileDialog.FileName);
         var bytes = File.ReadAllBytes(openFileDialog.FileName);
-        _imageUri = ImageHelper.ImageToString(bytes);
+        _imageUri = ImageHelper.ImageToString(bytes, 75, 75);
         Debug.WriteLine(_imageUri);
     }
     public void GetModel()
@@ -74,6 +77,6 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         Width = 150;
         _imageUri = null;
         _guid = Guid.NewGuid();
-        _saveUpdateText = "Save Prompt";
+        _saveUpdateText = savePromptString;
     }
 }
