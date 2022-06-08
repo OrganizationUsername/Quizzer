@@ -52,22 +52,17 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
         };
         if (openFileDialog.ShowDialog() != true) { return; }
 
+
         lastDirectory = Path.GetFullPath(openFileDialog.FileName);
         var bytes = File.ReadAllBytes(openFileDialog.FileName);
-        _imageUri = ImageHelper.ImageToString(bytes, 75, 75);
+        ImageUri = ImageHelper.ImageToString(bytes, 75, 75);
         Debug.WriteLine(_imageUri);
     }
+
     public void GetModel()
     {
         if (string.IsNullOrWhiteSpace(ShowText)) return;
-        _promptMessenger.LoadQuestions(new GuessTheLetterPrompt()
-        {
-            ShowText = _showText.ToUpperInvariant(),
-            Width = _width,
-            Type = Type,
-            ImageURI = _imageUri,
-            PromptId = _guid,
-        });
+        _promptMessenger.LoadQuestions(new GuessTheLetterPrompt() { ShowText = _showText.ToUpperInvariant(), Width = _width, Type = Type, ImageURI = _imageUri, PromptId = _guid, });
         ResetViewModel();
     }
 
@@ -75,8 +70,8 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     {
         ShowText = "";
         Width = 150;
-        _imageUri = null;
+        ImageUri = null;
         _guid = Guid.NewGuid();
-        _saveUpdateText = savePromptString;
+        SaveUpdateText = savePromptString;
     }
 }

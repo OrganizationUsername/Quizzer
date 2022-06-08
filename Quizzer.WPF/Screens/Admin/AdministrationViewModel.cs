@@ -18,12 +18,12 @@ namespace Quizzer.WPF.Screens.Admin;
 [ObservableObject]
 public partial class AdministrationViewModel
 {
+    private readonly string _explorer = Environment.GetEnvironmentVariable("WINDIR") + @"\explorer.exe";
     private readonly PromptMessenger _promptMessenger;
     private readonly QuestionsMessenger _questionsMessenger;
     public ObservableCollection<string> Quizzes { get; set; }
-    public ObservableCollection<NameAndType> QuestionTypes { get; set; }
-    private readonly string _directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Quizzer");
-    //[ICommand] private void ShowTextBox() => MessageBox.Show("Hello!");
+    public ObservableCollection<NameAndType> QuestionTypes { get; set; } = new();
+    private readonly string _directory = Path.Combine(Environment.SpecialFolder.CommonDocuments.ToString(), "Quizzer");
     public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName) && (SelectedQuiz == _newQuizName || !existingPromptsCollectionNamesLower.Contains(_newQuizName.ToLower()));
     [ObservableProperty] private string _newQuizName = "";
     partial void OnNewQuizNameChanged(string value) => GetJsonCommand.NotifyCanExecuteChanged();
@@ -36,7 +36,12 @@ public partial class AdministrationViewModel
     [ObservableProperty] private NameAndType _selectedQuestionType = null!;
     [ObservableProperty] private bool _canSelectQuiz = true;
 
-    [ICommand] public void PassNull() => _promptMessenger.NullPrompt();
+    [ICommand]
+    public void PassNull()
+    {
+        _promptMessenger.NullPrompt();
+        SelectedPrompt = null;
+    }
 
     public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger)
     {
@@ -47,7 +52,6 @@ public partial class AdministrationViewModel
         Prompts = new();
 
         Quizzes = new();
-        QuestionTypes = new();
         QuestionTypes.Add(new() { Name = nameof(GuessTheLetterPrompt), Type = typeof(GuessTheLetterPromptViewModel) });
         QuestionTypes.Add(new() { Name = nameof(TypeTheWordPrompt), Type = typeof(TypeTheWordPromptViewModel) });
         SelectedQuestionType = QuestionTypes.First();
@@ -94,6 +98,34 @@ public partial class AdministrationViewModel
         var promptToDelete = Prompts.FirstOrDefault(x => x.PromptId == SelectedPrompt?.PromptId);
         if (promptToDelete is null) { return; }
         Prompts.Remove(promptToDelete);
+    }
+
+    [ICommand]
+    public void OpenQuizDirectory()
+    {
+        Process.Start(_explorer, _directory);
+    }
+
+    [ICommand]
+    public void DeleteSelectedQuiz()
+    {
+        if (SelectedQuiz is null) { return; }
+        
+        //Change selected
+        var serializedThing = File.ReadAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"));
+        var promptPackage = JsonSerializer.Deserialize<PromptCollection>(serializedThing);
+        if (promptPackage is null) { return; }
+        promptPackage.Deleted = true;
+        var serialized = JsonSerializer.Serialize(promptPackage,
+            new JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                WriteIndented = true
+            });
+        File.WriteAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"), serialized);
+        
+        //Remove string corresponding to selected Quiz
+        Quizzes.Remove(SelectedQuiz);
     }
 
     [ICommand]
@@ -172,7 +204,7 @@ public partial class AdministrationViewModel
                 //I shouldn't have to deserialize just to prove it exists.
                 var promptPackage = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(file));
                 //I could iterate through it and make sure all of them have the minimum required fields.
-                if (promptPackage is not null &&
+                if (promptPackage is not null && !promptPackage.Deleted &&
                     ((promptPackage.GuessTheLetterPrompts != null && promptPackage.GuessTheLetterPrompts.Any()) ||
                      (promptPackage.TypeTheWordPrompts != null && promptPackage.TypeTheWordPrompts.Any()))
                    )

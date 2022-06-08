@@ -5,6 +5,7 @@ namespace Quizzer.WPF.Models;
 
 public class PromptCollection
 {
+    public bool Deleted { get; set; } = false;
     public List<GuessTheLetterPrompt>? GuessTheLetterPrompts { get; set; }
     public List<TypeTheWordPrompt>? TypeTheWordPrompts { get; set; }
 

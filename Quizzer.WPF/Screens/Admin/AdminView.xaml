@@ -9,9 +9,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance admin:AdministrationViewModel}">
-    <UserControl.InputBindings>
+    <!--<UserControl.InputBindings>
         <KeyBinding Command="{Binding ShowTextBoxCommand}" Key="O" Modifiers="Ctrl+Shift"/>
-    </UserControl.InputBindings>
+    </UserControl.InputBindings>-->
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type promptTypes:GuessTheLetterPromptViewModel}">
             <promptTypes:GuessTheLetterPromptView/>
@@ -45,6 +45,9 @@
             <StackPanel Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
                 <ListBox ItemsSource="{Binding Quizzes}" SelectionMode="Single" IsSynchronizedWithCurrentItem="True" SelectedValue="{Binding SelectedQuiz}" IsEnabled="{Binding CanSelectQuiz}"/>
                 <Button Command="{Binding SetQuizCommand}" Content="Select Quiz"/>
+                <Separator Height="100"/>
+                <Button Content="Open Directory" Command="{Binding OpenQuizDirectoryCommand}"/>
+                <Button Content="Delete Prompt" Command="{Binding DeleteSelectedQuizCommand}"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Grid.Row="0">
                 <DockPanel >
