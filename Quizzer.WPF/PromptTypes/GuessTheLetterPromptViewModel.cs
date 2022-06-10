@@ -8,13 +8,6 @@ using Quizzer.WPF.Models;
 
 namespace Quizzer.WPF.PromptTypes;
 
-public interface IPromptViewModel
-{
-    public string ShowText { get; set; }
-    public string ImageUri { get; set; }
-    void GetModel();
-}
-
 [ObservableObject]
 public partial class GuessTheLetterPromptViewModel : IPromptViewModel
 {
@@ -30,7 +23,6 @@ public partial class GuessTheLetterPromptViewModel : IPromptViewModel
     private string lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger)
     {
-        //ToDo: I should use the 
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptPassed += UpdatePrompt;
         _promptMessenger.PromptNulled += ResetViewModel;

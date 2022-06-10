@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Quizzer.WPF.Helpers;
 using Quizzer.WPF.PromptTypes;
 using Xunit;
@@ -13,9 +12,11 @@ public class AdminViewModelTests
         var questionsMessenger = new QuestionsMessenger();
         var promptMessenger = new PromptMessenger();
         var promptHandler = new PromptHandler();
+        var persistenceHandler = new NonPersistenceService();
+
         promptHandler.AddPromptViewModel(new GuessTheLetterPromptViewModel(promptMessenger));
         promptHandler.AddPromptViewModel(new TypeTheWordPromptViewModel(promptMessenger));
-        return new(questionsMessenger, promptMessenger, promptHandler);
+        return new(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
     }
 
     [Fact]
@@ -24,7 +25,7 @@ public class AdminViewModelTests
         var avm = GetAdminViewModel();
 
         avm.NewQuizName = "First";
-        Assert.True(avm.SelectedQuestionType.Type == typeof(GuessTheLetterPromptViewModel));
+        Assert.True(avm.SelectedQuestionType.Type == typeof(GuessTheLetterPromptViewModel)); //This is terrible.
         Assert.True(avm.Prompts.Count == 0);
         Assert.True(avm.Quizzes.Count == 0);
     }
@@ -75,7 +76,7 @@ public class AdminViewModelTests
         {
             Assert.True(avm.Prompts[i].GetType().Name == avm.QuestionTypes[i].Name);
         }
-        avm.GetJson();
+        avm.SavePromptCollection();
         Assert.True(avm.Prompts.Count == 0);
         Assert.True(avm.Quizzes.Count == 1);
     }

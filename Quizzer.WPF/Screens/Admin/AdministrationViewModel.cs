@@ -21,13 +21,14 @@ public partial class AdministrationViewModel
     private readonly string _explorer = Environment.GetEnvironmentVariable("WINDIR") + @"\explorer.exe";
     private readonly PromptMessenger _promptMessenger;
     internal readonly PromptHandler _promptHandler;
+    private readonly IPersistenceService _persistenceService;
     private readonly QuestionsMessenger _questionsMessenger;
     public ObservableCollection<string> Quizzes { get; set; }
     public ObservableCollection<NameAndType> QuestionTypes { get; set; }
     private readonly string _directory = Path.Combine(Environment.SpecialFolder.CommonDocuments.ToString(), "Quizzer");
     public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName) && (SelectedQuiz == _newQuizName || !existingPromptsCollectionNamesLower.Contains(_newQuizName.ToLower()));
     [ObservableProperty] private string _newQuizName = "";
-    partial void OnNewQuizNameChanged(string value) => GetJsonCommand.NotifyCanExecuteChanged();
+    partial void OnNewQuizNameChanged(string value) => SavePromptCollectionCommand.NotifyCanExecuteChanged();
     private readonly HashSet<string> existingPromptsCollectionNames = new();
     private readonly HashSet<string> existingPromptsCollectionNamesLower = new();
     [ObservableProperty] private string? _selectedQuiz;
@@ -44,7 +45,7 @@ public partial class AdministrationViewModel
         SelectedPrompt = null;
     }
 
-    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger, PromptHandler promptHandler)
+    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger, PromptHandler promptHandler, IPersistenceService persistenceService)
     {
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptLoaded += ReceivePrompt;
@@ -53,6 +54,7 @@ public partial class AdministrationViewModel
         Prompts = new();
 
         _promptHandler = promptHandler;
+        _persistenceService = persistenceService;
 
         Quizzes = new();
         QuestionTypes = new(promptHandler.GetQuestionTypes());
@@ -135,7 +137,7 @@ public partial class AdministrationViewModel
     }
 
     [ICommand(CanExecute = nameof(CanExecuteThing))]
-    public void GetJson()
+    public void SavePromptCollection()
     {
         if (nameof(_promptMessenger) == "_promptMessenger") _ = 1;
         var result = new PromptCollection()
@@ -143,17 +145,18 @@ public partial class AdministrationViewModel
             GuessTheLetterPrompts = Prompts.Where(x => x.GetType().Name == "GuessTheLetterPrompt").Cast<GuessTheLetterPrompt>().ToList(),
             TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
         };
-        var serialized = JsonSerializer.Serialize(result,
-            new JsonSerializerOptions()
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = true
-            });
-        File.WriteAllText(Path.Combine(_directory, $"{_newQuizName}.prompts"), serialized);
+
+        var serialized = _persistenceService.SavePromptCollection(result, _newQuizName);
+
+        if (string.IsNullOrWhiteSpace(serialized))
+        {
+            MessageBox.Show($"There was an issue saving.");
+            return;
+        }
 
         Debug.WriteLine(serialized);
         Prompts.Clear();
-        //Shouldn't I fail if the CollectionName already exists?
+
         if (!existingPromptsCollectionNames.Contains(_newQuizName) && !existingPromptsCollectionNamesLower.Contains(_newQuizName))
         {
             existingPromptsCollectionNames.Add(_newQuizName);
@@ -166,15 +169,15 @@ public partial class AdministrationViewModel
     [ICommand]
     public void Loaded()
     {
+        //This needs to be done in a persistence-agnostic way.
         if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); }
         CreateDefaultPrompts(_directory);
         if (Quizzes.Count > 0) { return; }
 
         var files = Directory.GetFiles(_directory);
         GetValidPromptCollections(files);
-        var tempList = existingPromptsCollectionNames.ToList();
         Quizzes.Clear();
-        foreach (var t in tempList) { Quizzes.Add(t); }
+        foreach (var t in existingPromptsCollectionNames) { Quizzes.Add(t); }
     }
 
     [ICommand]
@@ -200,7 +203,7 @@ public partial class AdministrationViewModel
         {
             try
             {
-                //I shouldn't have to deserialize just to prove it exists.
+                //I shouldn't have to deserialize just to prove it exists. But I do have to deserialize to figure out if it's been soft-deleted.
                 var promptPackage = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(file));
                 //I could iterate through it and make sure all of them have the minimum required fields.
                 if (promptPackage is not null && !promptPackage.Deleted &&
@@ -222,6 +225,7 @@ public partial class AdministrationViewModel
 
     private void CreateDefaultPrompts(string directory)
     {
+        //Check to see if there are any prompts at all in a persistence-agnostic way. 
         JsonSerializerOptions options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
         try
         {
@@ -230,7 +234,7 @@ public partial class AdministrationViewModel
             {
                 var result = new PromptCollection()
                 {
-                    GuessTheLetterPrompts = PromptService.GetCleanPrompts().Cast<GuessTheLetterPrompt>().ToList(),
+                    GuessTheLetterPrompts = PromptInitializationService.GetCleanPrompts().Cast<GuessTheLetterPrompt>().ToList(),
                     TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
                 };
                 var serialized = JsonSerializer.Serialize(result, options);
@@ -242,7 +246,7 @@ public partial class AdministrationViewModel
             {
                 var result = new PromptCollection()
                 {
-                    GuessTheLetterPrompts = PromptService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(),
+                    GuessTheLetterPrompts = PromptInitializationService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(),
                     TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
                 };
                 var serialized = JsonSerializer.Serialize(result, options);

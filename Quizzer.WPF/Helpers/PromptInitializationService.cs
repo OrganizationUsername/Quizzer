@@ -5,7 +5,7 @@ using Quizzer.WPF.PromptTypes;
 
 namespace Quizzer.WPF.Helpers;
 
-public static class PromptService
+public static class PromptInitializationService
 {
     public static List<Prompt> GetCleanPrompts() => new()
     {

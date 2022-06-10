@@ -4,17 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:converters="clr-namespace:Quizzer.WPF.Converters"
         xmlns:quiz="clr-namespace:Quizzer.WPF.Screens.Quiz"
         xmlns:admin="clr-namespace:Quizzer.WPF.Screens.Admin"
         xmlns:main="clr-namespace:Quizzer.WPF.Screens.Main"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Window.DataContext>
-        <main:MainViewModel />
-    </Window.DataContext>
+        Title="MainWindow" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance main:MainViewModel}">
     <Window.Resources>
-        <converters:Base64ImageConverter x:Key="Base64ImageConverter"/>
         <DataTemplate DataType="{x:Type admin:AdministrationViewModel}">
             <admin:Admin/>
         </DataTemplate>

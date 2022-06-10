@@ -59,7 +59,7 @@
                 <Button Content="Delete Selected Question" Command="{Binding DeleteSelectedQuestionCommand}"/>
                 <ComboBox ItemsSource="{Binding QuestionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedQuestionType}"/>
                 <ListView ItemsSource="{Binding Prompts}" DisplayMemberPath="ShowText" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SelectedPrompt}" MinHeight="20"/>
-                <Button Content="Save Prompt Collection" Command="{Binding GetJsonCommand}"/>
+                <Button Content="Save Prompt Collection" Command="{Binding SavePromptCollectionCommand}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Grid.Row="0">
                 <ContentControl Content="{Binding PromptViewModel}" />

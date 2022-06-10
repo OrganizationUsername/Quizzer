@@ -11,12 +11,11 @@ namespace Quizzer.WPF;
 public partial class App : Application
 {
     public ServiceProvider Services { get; set; } = null!;
-    public new static App Current => (App)Application.Current; //This makes Unit Testing worse. 
 
     public App()
     {
         Setup();
-        var x = new MainWindow();/*{ DataContext = Services.GetService<MainViewModel>() };*/ /*if this were VM-first, I wouldn't have this issue. */
+        var x = new MainWindow() { DataContext = Services.GetService<MainViewModel>() }; /*if this were VM-first, I wouldn't have this issue. */
         x.Show();
     }
 
@@ -25,13 +24,14 @@ public partial class App : Application
         var services = new ServiceCollection();
         ConfigureServices(services);
         Services = services.BuildServiceProvider();
-        var ph = Services.GetService<PromptHandler>();
+        var ph = Services.GetService<PromptHandler>()!;
         ph.AddPromptViewModel(Services.GetService<TypeTheWordPromptViewModel>()!);
         ph.AddPromptViewModel(Services.GetService<GuessTheLetterPromptViewModel>()!);
     }
 
     private static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<IPersistenceService, JsonPersistenceService>();
         services.AddSingleton<QuestionsMessenger>();
         services.AddSingleton<PromptMessenger>();
         services.AddSingleton<AdministrationViewModel>();
