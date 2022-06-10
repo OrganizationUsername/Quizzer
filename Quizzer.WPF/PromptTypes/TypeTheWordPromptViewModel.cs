@@ -3,18 +3,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quizzer.WPF.Helpers;
 using Quizzer.WPF.Models;
-using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.WPF.PromptTypes;
 
 [ObservableObject]
-internal partial class TypeTheWordPromptViewModel : IPromptViewModel
+public partial class TypeTheWordPromptViewModel : IPromptViewModel
 {
     private readonly PromptMessenger _promptMessenger;
 
-    [ObservableProperty] public string _showText = "";
-    [ObservableProperty] public int _width = 150;
-    [ObservableProperty] public string? _imageUri = null;
+    [ObservableProperty] private string _showText = "";
+    [ObservableProperty] private int _width = 150;
+    [ObservableProperty] private string? _imageUri = null;
     public readonly string Type = "TypeTheWordPrompt";
     public RelayCommand GetModelCommand => new(GetModel);
     private Guid _guid;

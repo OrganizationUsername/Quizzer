@@ -6,31 +6,39 @@ using Quizzer.WPF.Screens.Admin;
 using Quizzer.WPF.Screens.Main;
 using Quizzer.WPF.Screens.Quiz;
 
-namespace Quizzer.WPF
+namespace Quizzer.WPF;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public ServiceProvider Services { get; set; } = null!;
+    public new static App Current => (App)Application.Current; //This makes Unit Testing worse. 
+
+    public App()
     {
-        public ServiceProvider Services { get; set; }
-        public new static App Current => (App)Application.Current;
+        Setup();
+        var x = new MainWindow();/*{ DataContext = Services.GetService<MainViewModel>() };*/ /*if this were VM-first, I wouldn't have this issue. */
+        x.Show();
+    }
 
-        public App()
-        {
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-            Services = services.BuildServiceProvider();
-            var x = new MainWindow();/*{ DataContext = Services.GetService<MainViewModel>() };*/ /*if this were VM-first, I wouldn't have this issue. */
-            x.Show();
-        }
+    private void Setup()
+    {
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        Services = services.BuildServiceProvider();
+        var ph = Services.GetService<PromptHandler>();
+        ph.AddPromptViewModel(Services.GetService<TypeTheWordPromptViewModel>()!);
+        ph.AddPromptViewModel(Services.GetService<GuessTheLetterPromptViewModel>()!);
+    }
 
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddSingleton<QuestionsMessenger>();
-            services.AddSingleton<PromptMessenger>();
-            services.AddSingleton<AdministrationViewModel>();
-            services.AddSingleton<QuizViewModel>();
-            services.AddSingleton<TypeTheWordPromptViewModel>();
-            services.AddSingleton<GuessTheLetterPromptViewModel>();
-            services.AddSingleton<MainViewModel>();
-        }
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<QuestionsMessenger>();
+        services.AddSingleton<PromptMessenger>();
+        services.AddSingleton<AdministrationViewModel>();
+        services.AddSingleton<QuizViewModel>();
+        services.AddSingleton<TypeTheWordPromptViewModel>();
+        services.AddSingleton<GuessTheLetterPromptViewModel>();
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<PromptHandler>();
     }
 }

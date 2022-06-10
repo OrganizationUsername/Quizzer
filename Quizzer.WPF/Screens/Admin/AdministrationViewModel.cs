@@ -20,9 +20,10 @@ public partial class AdministrationViewModel
 {
     private readonly string _explorer = Environment.GetEnvironmentVariable("WINDIR") + @"\explorer.exe";
     private readonly PromptMessenger _promptMessenger;
+    internal readonly PromptHandler _promptHandler;
     private readonly QuestionsMessenger _questionsMessenger;
     public ObservableCollection<string> Quizzes { get; set; }
-    public ObservableCollection<NameAndType> QuestionTypes { get; set; } = new();
+    public ObservableCollection<NameAndType> QuestionTypes { get; set; }
     private readonly string _directory = Path.Combine(Environment.SpecialFolder.CommonDocuments.ToString(), "Quizzer");
     public bool CanExecuteThing() => !string.IsNullOrWhiteSpace(_newQuizName) && (SelectedQuiz == _newQuizName || !existingPromptsCollectionNamesLower.Contains(_newQuizName.ToLower()));
     [ObservableProperty] private string _newQuizName = "";
@@ -43,7 +44,7 @@ public partial class AdministrationViewModel
         SelectedPrompt = null;
     }
 
-    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger)
+    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger, PromptHandler promptHandler)
     {
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptLoaded += ReceivePrompt;
@@ -51,13 +52,14 @@ public partial class AdministrationViewModel
         _questionsMessenger = questionsMessenger;
         Prompts = new();
 
+        _promptHandler = promptHandler;
+
         Quizzes = new();
-        QuestionTypes.Add(new() { Name = nameof(GuessTheLetterPrompt), Type = typeof(GuessTheLetterPromptViewModel) });
-        QuestionTypes.Add(new() { Name = nameof(TypeTheWordPrompt), Type = typeof(TypeTheWordPromptViewModel) });
+        QuestionTypes = new(promptHandler.GetQuestionTypes());
         SelectedQuestionType = QuestionTypes.First();
     }
 
-    partial void OnSelectedQuestionTypeChanged(NameAndType value) => PromptViewModel = (IPromptViewModel)App.Current.Services.GetService(_selectedQuestionType.Type);
+    partial void OnSelectedQuestionTypeChanged(NameAndType value) => PromptViewModel = _promptHandler.GetViewModel(_selectedQuestionType.Type);
 
     partial void OnSelectedPromptChanged(Prompt? value)
     {
@@ -100,17 +102,13 @@ public partial class AdministrationViewModel
         Prompts.Remove(promptToDelete);
     }
 
-    [ICommand]
-    public void OpenQuizDirectory()
-    {
-        Process.Start(_explorer, _directory);
-    }
+    [ICommand] public void OpenQuizDirectory() => Process.Start(_explorer, _directory);
 
     [ICommand]
     public void DeleteSelectedQuiz()
     {
         if (SelectedQuiz is null) { return; }
-        
+
         //Change selected
         var serializedThing = File.ReadAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"));
         var promptPackage = JsonSerializer.Deserialize<PromptCollection>(serializedThing);
@@ -123,7 +121,7 @@ public partial class AdministrationViewModel
                 WriteIndented = true
             });
         File.WriteAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"), serialized);
-        
+
         //Remove string corresponding to selected Quiz
         Quizzes.Remove(SelectedQuiz);
     }
@@ -155,6 +153,7 @@ public partial class AdministrationViewModel
 
         Debug.WriteLine(serialized);
         Prompts.Clear();
+        //Shouldn't I fail if the CollectionName already exists?
         if (!existingPromptsCollectionNames.Contains(_newQuizName) && !existingPromptsCollectionNamesLower.Contains(_newQuizName))
         {
             existingPromptsCollectionNames.Add(_newQuizName);

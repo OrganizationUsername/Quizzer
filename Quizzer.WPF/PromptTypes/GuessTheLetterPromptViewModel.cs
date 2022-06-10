@@ -8,15 +8,20 @@ using Quizzer.WPF.Models;
 
 namespace Quizzer.WPF.PromptTypes;
 
-public interface IPromptViewModel { }
+public interface IPromptViewModel
+{
+    public string ShowText { get; set; }
+    public string ImageUri { get; set; }
+    void GetModel();
+}
 
 [ObservableObject]
-internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
+public partial class GuessTheLetterPromptViewModel : IPromptViewModel
 {
     private readonly PromptMessenger _promptMessenger;
-    [ObservableProperty] public string _showText = "";
-    [ObservableProperty] public int _width = 150;
-    [ObservableProperty] public string? _imageUri;
+    [ObservableProperty] private string _showText = "";
+    [ObservableProperty] private int _width = 150;
+    [ObservableProperty] private string? _imageUri;
     [ObservableProperty] private string _saveUpdateText = "Save Prompt";
     private const string savePromptString = "Save Prompt";
     private const string updatePromptString = "Update Prompt";
@@ -25,6 +30,7 @@ internal partial class GuessTheLetterPromptViewModel : IPromptViewModel
     private string lastDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     public GuessTheLetterPromptViewModel(PromptMessenger promptMessenger)
     {
+        //ToDo: I should use the 
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptPassed += UpdatePrompt;
         _promptMessenger.PromptNulled += ResetViewModel;
