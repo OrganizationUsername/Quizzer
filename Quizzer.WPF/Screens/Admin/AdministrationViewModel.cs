@@ -83,15 +83,15 @@ public partial class AdministrationViewModel
         Prompts.Add(p);
     }
 
-    partial void OnSelectedQuizChanged(string? value)
+    async partial void OnSelectedQuizChanged(string? value)
     {
         if (value is null) { return; }
-        var prompts = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(Path.Combine(_directory, $"{value}.prompts")));
-        if (prompts is null) { return; }
+
+        var prompts = await _persistenceService.GetPromptsFromNamedCollection(value, false);
+        if (!prompts.Any()) { return; }
 
         Prompts.Clear();
-        if (prompts.GuessTheLetterPrompts != null) { foreach (var prompt in prompts.GuessTheLetterPrompts) { Prompts.Add(prompt); } }
-        if (prompts.TypeTheWordPrompts != null) { foreach (var prompt in prompts.TypeTheWordPrompts) { Prompts.Add(prompt); } }
+        foreach (var p in prompts) { Prompts.Add(p); }
 
         NewQuizName = value;
     }
@@ -109,23 +109,9 @@ public partial class AdministrationViewModel
     [ICommand]
     public void DeleteSelectedQuiz()
     {
-        if (SelectedQuiz is null) { return; }
-
-        //Change selected
-        var serializedThing = File.ReadAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"));
-        var promptPackage = JsonSerializer.Deserialize<PromptCollection>(serializedThing);
-        if (promptPackage is null) { return; }
-        promptPackage.Deleted = true;
-        var serialized = JsonSerializer.Serialize(promptPackage,
-            new JsonSerializerOptions()
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = true
-            });
-        File.WriteAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"), serialized);
-
-        //Remove string corresponding to selected Quiz
-        Quizzes.Remove(SelectedQuiz);
+        var (success, quizNameOrError) = _persistenceService.SoftDeleteSelectedQuiz(SelectedQuiz);
+        if (success) { Quizzes.Remove(quizNameOrError); }
+        else { MessageBox.Show($"There was an error:{Environment.NewLine}{quizNameOrError}"); }
     }
 
     [ICommand]
@@ -146,15 +132,15 @@ public partial class AdministrationViewModel
             TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
         };
 
-        var serialized = _persistenceService.SavePromptCollection(result, _newQuizName);
+        var (saveMessage, errorMessage) = _persistenceService.SavePromptCollection(result, _newQuizName);
 
-        if (string.IsNullOrWhiteSpace(serialized))
+        if (string.IsNullOrWhiteSpace(saveMessage))
         {
-            MessageBox.Show($"There was an issue saving.");
+            MessageBox.Show($"There was an issue saving.{Environment.NewLine}{errorMessage}");
             return;
         }
 
-        Debug.WriteLine(serialized);
+        Trace.WriteLine(saveMessage);
         Prompts.Clear();
 
         if (!existingPromptsCollectionNames.Contains(_newQuizName) && !existingPromptsCollectionNamesLower.Contains(_newQuizName))
@@ -169,15 +155,16 @@ public partial class AdministrationViewModel
     [ICommand]
     public void Loaded()
     {
-        //This needs to be done in a persistence-agnostic way.
-        if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); }
-        CreateDefaultPrompts(_directory);
-        if (Quizzes.Count > 0) { return; }
-
-        var files = Directory.GetFiles(_directory);
-        GetValidPromptCollections(files);
+        var existingNames = _persistenceService.InitializePersistence();
         Quizzes.Clear();
-        foreach (var t in existingPromptsCollectionNames) { Quizzes.Add(t); }
+        existingPromptsCollectionNames.Clear();
+        existingPromptsCollectionNamesLower.Clear();
+        foreach (var fileName in existingNames)
+        {
+            existingPromptsCollectionNames.Add(fileName);
+            existingPromptsCollectionNamesLower.Add(fileName.ToLower());
+            Quizzes.Add(fileName);
+        }
     }
 
     [ICommand]
@@ -195,64 +182,5 @@ public partial class AdministrationViewModel
             _questionsMessenger.LoadQuestions(qs);
         }
         catch (Exception e) { MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{e}"); }
-    }
-
-    private void GetValidPromptCollections(string[] files)
-    {
-        foreach (var file in files)
-        {
-            try
-            {
-                //I shouldn't have to deserialize just to prove it exists. But I do have to deserialize to figure out if it's been soft-deleted.
-                var promptPackage = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(file));
-                //I could iterate through it and make sure all of them have the minimum required fields.
-                if (promptPackage is not null && !promptPackage.Deleted &&
-                    ((promptPackage.GuessTheLetterPrompts != null && promptPackage.GuessTheLetterPrompts.Any()) ||
-                     (promptPackage.TypeTheWordPrompts != null && promptPackage.TypeTheWordPrompts.Any()))
-                   )
-                {
-                    var fileName = Path.GetFileNameWithoutExtension(file);
-                    existingPromptsCollectionNames.Add(fileName);
-                    existingPromptsCollectionNamesLower.Add(fileName.ToLower());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-    }
-
-    private void CreateDefaultPrompts(string directory)
-    {
-        //Check to see if there are any prompts at all in a persistence-agnostic way. 
-        JsonSerializerOptions options = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
-        try
-        {
-            var cleanPath = Path.Combine(directory, "Clean.prompts");
-            if (Directory.Exists(directory) && !File.Exists(cleanPath))
-            {
-                var result = new PromptCollection()
-                {
-                    GuessTheLetterPrompts = PromptInitializationService.GetCleanPrompts().Cast<GuessTheLetterPrompt>().ToList(),
-                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
-                };
-                var serialized = JsonSerializer.Serialize(result, options);
-                File.WriteAllText(cleanPath, serialized);
-            }
-
-            var dirtyPath = Path.Combine(directory, "Dirty.prompts");
-            if (Directory.Exists(directory) && !File.Exists(dirtyPath))
-            {
-                var result = new PromptCollection()
-                {
-                    GuessTheLetterPrompts = PromptInitializationService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(),
-                    TypeTheWordPrompts = Prompts.Where(x => x.GetType().Name == "TypeTheWordPrompt").Cast<TypeTheWordPrompt>().ToList(),
-                };
-                var serialized = JsonSerializer.Serialize(result, options);
-                File.WriteAllText(dirtyPath, serialized);
-            }
-        }
-        catch (Exception ex) { MessageBox.Show($"An error occurred:{Environment.NewLine}{ex}"); }
     }
 }

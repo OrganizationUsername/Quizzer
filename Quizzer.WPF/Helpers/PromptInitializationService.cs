@@ -7,6 +7,7 @@ namespace Quizzer.WPF.Helpers;
 
 public static class PromptInitializationService
 {
+    //ToDo: These two should both be written as PromptCollections, not a list of prompts.
     public static List<Prompt> GetCleanPrompts() => new()
     {
         new GuessTheLetterPrompt() { ShowText = "DOG", Width = 150, PromptId = Guid.NewGuid(), Type = "GuessTheLetterPrompt" },
