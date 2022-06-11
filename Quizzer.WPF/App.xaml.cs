@@ -32,6 +32,7 @@ public partial class App : Application
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IPersistenceService, JsonPersistenceService>();
+        services.AddSingleton<INotificationHandler, MessageBoxNotificationHandler>();
         services.AddSingleton<QuestionsMessenger>();
         services.AddSingleton<PromptMessenger>();
         services.AddSingleton<AdministrationViewModel>();

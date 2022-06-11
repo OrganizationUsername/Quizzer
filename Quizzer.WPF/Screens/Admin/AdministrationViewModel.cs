@@ -20,6 +20,7 @@ public partial class AdministrationViewModel
     private readonly PromptMessenger _promptMessenger;
     internal readonly PromptHandler _promptHandler;
     private readonly IPersistenceService _persistenceService;
+    private readonly INotificationHandler _notificationHandler;
     private readonly QuestionsMessenger _questionsMessenger;
     public ObservableCollection<string> Quizzes { get; set; }
     public ObservableCollection<NameAndType> QuestionTypes { get; set; }
@@ -43,7 +44,7 @@ public partial class AdministrationViewModel
         SelectedPrompt = null;
     }
 
-    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger, PromptHandler promptHandler, IPersistenceService persistenceService)
+    public AdministrationViewModel(QuestionsMessenger questionsMessenger, PromptMessenger promptMessenger, PromptHandler promptHandler, IPersistenceService persistenceService, INotificationHandler notificationHandler)
     {
         _promptMessenger = promptMessenger;
         _promptMessenger.PromptLoaded += ReceivePrompt;
@@ -53,6 +54,8 @@ public partial class AdministrationViewModel
 
         _promptHandler = promptHandler;
         _persistenceService = persistenceService;
+
+        _notificationHandler = notificationHandler;
 
         Quizzes = new();
         QuestionTypes = new(promptHandler.GetQuestionTypes());
@@ -109,7 +112,7 @@ public partial class AdministrationViewModel
     {
         var (success, quizNameOrError) = _persistenceService.SoftDeleteSelectedQuiz(SelectedQuiz);
         if (success) { Quizzes.Remove(quizNameOrError); }
-        else { MessageBox.Show($"There was an error:{Environment.NewLine}{quizNameOrError}"); }
+        else { _notificationHandler.ShowMessage($"There was an error:{Environment.NewLine}{quizNameOrError}", "Error!"); }
     }
 
     [ICommand]
@@ -135,7 +138,7 @@ public partial class AdministrationViewModel
 
         if (string.IsNullOrWhiteSpace(saveMessage))
         {
-            MessageBox.Show($"There was an issue saving.{Environment.NewLine}{errorMessage}");
+            _notificationHandler.ShowMessage($"There was an issue saving.{Environment.NewLine}{errorMessage}", "Error!");
             return;
         }
 
@@ -174,8 +177,7 @@ public partial class AdministrationViewModel
         var (prompts, error) = _persistenceService.GetCollectionQuestions(SelectedQuiz);
         if (error is not null)
         {
-            //This needs to be done by a messageBox handler that shows the message so Unit Tests don't get a messageBox.
-            MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{error}");
+            _notificationHandler.ShowMessage($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{error}", "Error!");
         }
 
         //ToDo: So here's where I would need to have some historical data on the user's performance per question

@@ -1,3 +1,4 @@
+using Quizzer.WPF;
 using Quizzer.WPF.Helpers;
 using Quizzer.WPF.PromptTypes;
 using Xunit;
@@ -19,10 +20,11 @@ public class AdminViewModelTests
         var promptMessenger = new PromptMessenger();
         var promptHandler = new PromptHandler();
         var persistenceHandler = new NonPersistenceService();
-
+        var testingNotificationHandler = new TestingNotificationHandler();
         promptHandler.AddPromptViewModel(new GuessTheLetterPromptViewModel(promptMessenger));
         promptHandler.AddPromptViewModel(new TypeTheWordPromptViewModel(promptMessenger));
-        var administrationViewModel = new AdministrationViewModel(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
+
+        var administrationViewModel = new AdministrationViewModel(questionsMessenger, promptMessenger, promptHandler, persistenceHandler, testingNotificationHandler);
         var quizViewModel = new QuizViewModel(questionsMessenger);
         administrationViewModel.Loaded();
         return (administrationViewModel, quizViewModel);
