@@ -70,8 +70,6 @@ public class JsonPersistenceService : IPersistenceService
 
         var filePaths = Directory.GetFiles(_directory);
         var (existingNames, existingNamesLower) = GetValidPromptCollections(filePaths);
-        var quizNames = new List<string>();
-        foreach (var t in existingNames) { quizNames.Add(t); }
 
         return existingNames;
     }

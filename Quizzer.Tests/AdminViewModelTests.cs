@@ -16,7 +16,9 @@ public class AdminViewModelTests
 
         promptHandler.AddPromptViewModel(new GuessTheLetterPromptViewModel(promptMessenger));
         promptHandler.AddPromptViewModel(new TypeTheWordPromptViewModel(promptMessenger));
-        return new(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
+        var result = new AdministrationViewModel(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
+        result.Loaded();
+        return result;
     }
 
     [Fact]
@@ -27,7 +29,7 @@ public class AdminViewModelTests
         avm.NewQuizName = "First";
         Assert.True(avm.SelectedQuestionType.Type == typeof(GuessTheLetterPromptViewModel)); //This is terrible.
         Assert.True(avm.Prompts.Count == 0);
-        Assert.True(avm.Quizzes.Count == 0);
+        Assert.True(avm.Quizzes.Count == 2);
     }
 
     [Fact]
@@ -78,6 +80,6 @@ public class AdminViewModelTests
         }
         avm.SavePromptCollection();
         Assert.True(avm.Prompts.Count == 0);
-        Assert.True(avm.Quizzes.Count == 1);
+        Assert.True(avm.Quizzes.Count == 3);
     }
 }
