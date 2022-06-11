@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Quizzer.WPF.Models;
@@ -9,32 +10,25 @@ namespace Quizzer.WPF.Helpers;
 public class NonPersistenceService : IPersistenceService
 {
     private readonly List<(PromptCollection pc, string Name)> _promptCollections = new();
-
     public (string, string) SavePromptCollection(PromptCollection pc, string newQuizName) => ("Successful save.", string.Empty);
     public List<string> InitializePersistence()
     {
-        _promptCollections.Add((new PromptCollection() { GuessTheLetterPrompts = PromptInitializationService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(), }, "Dirty"));
-        _promptCollections.Add((new PromptCollection() { GuessTheLetterPrompts = PromptInitializationService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(), }, "Clear"));
+        _promptCollections.Add((new() { GuessTheLetterPrompts = PromptInitializationService.GetDirtyPrompts().Cast<GuessTheLetterPrompt>().ToList(), }, "Dirty"));
+        _promptCollections.Add((new() { GuessTheLetterPrompts = PromptInitializationService.GetCleanPrompts().Cast<GuessTheLetterPrompt>().ToList(), }, "Clean"));
         return _promptCollections.Select(x => x.Name).ToList();
     }
-
     public (List<Prompt> prompts, string? error) GetCollectionQuestions(string SelectedQuiz)
     {
-        throw new System.NotImplementedException();
+        (PromptCollection pc, string Name) result = _promptCollections.FirstOrDefault(x => x.Name == SelectedQuiz);
+        if (result.Equals(default)) { return (new(), "Couldn't find PromptCollection"); }
+        return (result.pc.GetPrompts(), null);
     }
 
-    public (bool success, string QuizNameOrError) SoftDeleteSelectedQuiz(string? SelectedQuiz)
+    public (bool success, string QuizNameOrError) SoftDeleteSelectedQuiz(string? SelectedQuiz) => throw new NotImplementedException();
+    public async Task<(List<Prompt> prompts, string? error)> GetPromptsFromNamedCollection(string name, bool deleted)
     {
-        throw new System.NotImplementedException();
-    }
-
-    public (HashSet<string> existingNames, HashSet<string> existingNamesLower, List<string> quizNames) GetPromptCollections(bool includingDeleted)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public Task<List<Prompt>> GetPromptsFromNamedCollection(string name, bool deleted)
-    {
-        throw new System.NotImplementedException();
+        var result = _promptCollections.FirstOrDefault(x => x.Name == name);
+        if (result.Equals(default)) { return await Task.FromResult((new List<Prompt>(), "Couldn't find PromptCollection")); }
+        return await Task.FromResult((result.pc.GetPrompts(), null as string));
     }
 }

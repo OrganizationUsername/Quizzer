@@ -10,9 +10,9 @@ public interface IPersistenceService
     /// <summary>
     /// Gets names of all PromptCollections and sets up defaults if there are none.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>List of names of PromptCollections</returns>
     List<string> InitializePersistence();
     (List<Prompt> prompts, string? error) GetCollectionQuestions(string SelectedQuiz);
     (bool success, string QuizNameOrError) SoftDeleteSelectedQuiz(string? SelectedQuiz);
-    Task<List<Prompt>> GetPromptsFromNamedCollection(string name, bool deleted);
+    Task<(List<Prompt> prompts, string? error)> GetPromptsFromNamedCollection(string name, bool deleted);
 }

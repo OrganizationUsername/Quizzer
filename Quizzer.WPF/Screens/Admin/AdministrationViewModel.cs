@@ -85,8 +85,8 @@ public partial class AdministrationViewModel
     {
         if (value is null) { return; }
 
-        var prompts = await _persistenceService.GetPromptsFromNamedCollection(value, false);
-        if (!prompts.Any()) { return; }
+        var (prompts, error) = await _persistenceService.GetPromptsFromNamedCollection(value, false);
+        if (!string.IsNullOrEmpty(error)) { return; }
 
         Prompts.Clear();
         foreach (var p in prompts) { Prompts.Add(p); }
@@ -118,6 +118,7 @@ public partial class AdministrationViewModel
         _selectedQuiz = null;
         CanSelectQuiz = false;
         Prompts.Clear();
+        _promptMessenger.NullPrompt();
     }
 
     [ICommand(CanExecute = nameof(CanExecuteThing))]
@@ -171,7 +172,11 @@ public partial class AdministrationViewModel
         if (SelectedQuiz is null) { return; }
 
         var (prompts, error) = _persistenceService.GetCollectionQuestions(SelectedQuiz);
-        if (error is not null) { MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{error}"); }
+        if (error is not null)
+        {
+            //This needs to be done by a messageBox handler that shows the message so Unit Tests don't get a messageBox.
+            MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{error}");
+        }
 
         //ToDo: So here's where I would need to have some historical data on the user's performance per question
         var qs = prompts.OrderBy(_ => Random.Shared.Next()).Select(p => p.GenerateQuestion()).ToList();

@@ -2,6 +2,7 @@ using Quizzer.WPF.Helpers;
 using Quizzer.WPF.PromptTypes;
 using Xunit;
 using Quizzer.WPF.Screens.Admin;
+using Quizzer.WPF.Screens.Quiz;
 
 namespace Quizzer.Tests;
 
@@ -12,7 +13,7 @@ public class PromptTests
 
 public class AdminViewModelTests
 {
-    public static AdministrationViewModel GetAdminViewModel()
+    public static (AdministrationViewModel, QuizViewModel) GetViewModels()
     {
         var questionsMessenger = new QuestionsMessenger();
         var promptMessenger = new PromptMessenger();
@@ -21,15 +22,16 @@ public class AdminViewModelTests
 
         promptHandler.AddPromptViewModel(new GuessTheLetterPromptViewModel(promptMessenger));
         promptHandler.AddPromptViewModel(new TypeTheWordPromptViewModel(promptMessenger));
-        var result = new AdministrationViewModel(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
-        result.Loaded();
-        return result;
+        var administrationViewModel = new AdministrationViewModel(questionsMessenger, promptMessenger, promptHandler, persistenceHandler);
+        var quizViewModel = new QuizViewModel(questionsMessenger);
+        administrationViewModel.Loaded();
+        return (administrationViewModel, quizViewModel);
     }
 
     [Fact]
     public void Initialization_Ok()
     {
-        var avm = GetAdminViewModel();
+        var (avm, qvm) = GetViewModels();
 
         avm.NewQuizName = "First";
         Assert.True(avm.SelectedQuestionType.Type == typeof(GuessTheLetterPromptViewModel)); //This is terrible.
@@ -38,9 +40,27 @@ public class AdminViewModelTests
     }
 
     [Fact]
+    public void SetQuiz_OK()
+    {
+        var (avm, qvm) = GetViewModels();
+        avm.SelectedQuiz = "Clean";
+        avm.SetQuiz();
+        Assert.Equal(3, qvm.Questions.Count);
+    }
+
+    [Fact]
+    public void SetQuizDoesNotExist_Bad()
+    {
+        var (avm, qvm) = GetViewModels();
+        avm.SelectedQuiz = "";
+        avm.SetQuiz();
+        Assert.Empty(qvm.Questions);
+    }
+
+    [Fact]
     public void AddPrompt_Ok()
     {
-        var avm = GetAdminViewModel();
+        var (avm, qvm) = GetViewModels();
 
         avm.NewQuizName = "First";
         var x = avm.PromptViewModel!;
@@ -53,7 +73,7 @@ public class AdminViewModelTests
     [Fact]
     public void AddEmptyShowText_Bad()
     {
-        var avm = GetAdminViewModel();
+        var (avm, qvm) = GetViewModels();
         avm.NewQuizName = "First";
         var x = avm.PromptViewModel!;
         x.ShowText = "    ";
@@ -66,7 +86,7 @@ public class AdminViewModelTests
     {
         //Incredibly brittle and should fail once I add more complicated PromptViewModels.
         //Having a question that requires multiple question choices should fail.
-        var avm = GetAdminViewModel();
+        var (avm, qvm) = GetViewModels();
         avm.NewQuizName = "First";
 
         for (var i = 0; i < avm.QuestionTypes.Count; i++)

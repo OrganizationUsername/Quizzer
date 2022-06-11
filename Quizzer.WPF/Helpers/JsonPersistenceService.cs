@@ -150,21 +150,26 @@ public class JsonPersistenceService : IPersistenceService
         catch (Exception ex) { MessageBox.Show($"An error occurred:{Environment.NewLine}{ex}"); }
     }
 
-    public async Task<List<Prompt>> GetPromptsFromNamedCollection(string name, bool deleted)
+    public async Task<(List<Prompt> prompts, string? error)> GetPromptsFromNamedCollection(string name, bool deleted)
     {
         try
         {
             await using var payLoad = File.OpenRead(Path.Combine(_directory, $"{name}.prompts{(deleted ? "x" : "")}"));
             var ps = await JsonSerializer.DeserializeAsync<PromptCollection>(payLoad);
-            if (ps is null) { return await Task.FromResult(new List<Prompt>()); }
+            if (ps is null)
+            {
+                return await Task.FromResult(
+                    (new List<Prompt>(), (string)null!)
+                    );
+            }
 
             var prompts = new List<Prompt>();
             if (ps.GuessTheLetterPrompts is not null) { foreach (var prompt in ps.GuessTheLetterPrompts) { prompts.Add(prompt); } }
             if (ps.TypeTheWordPrompts is not null) { foreach (var prompt in ps.TypeTheWordPrompts) { prompts.Add(prompt); } }
 
-            return prompts;
+            return (prompts, null);
         }
         //ToDo: Return error message along with list.
-        catch (Exception e) { return await Task.FromResult(new List<Prompt>()); }
+        catch (Exception e) { return await Task.FromResult((new List<Prompt>(), e.ToString())); }
     }
 }
