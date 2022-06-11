@@ -115,7 +115,7 @@ public class JsonPersistenceService : IPersistenceService
                 //I should return a Task that includes a place for List<string> errors
             }
         }
-        //ToDo: When I'm returning them, I should somehow indicate if they're deleted or not.
+        //When I'm returning them, I should somehow indicate if they're deleted or not.
         //I should focus less on the deleted stuff.
         return existingPromptsCollectionNames.ToList();
     }
@@ -169,7 +169,7 @@ public class JsonPersistenceService : IPersistenceService
 
             return (prompts, null);
         }
-        //ToDo: Return error message along with list.
+
         catch (Exception e) { return await Task.FromResult((new List<Prompt>(), e.ToString())); }
     }
 }

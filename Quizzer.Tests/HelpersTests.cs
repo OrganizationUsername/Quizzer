@@ -19,6 +19,7 @@ public class HelpersTests
             Assert.Contains(q.Answers, x => x.Text == q.Prompt.CorrectAnswer);
         }
     }
+
     [Fact]
     public void CheckGetDirtyPrompts_Ok()
     {

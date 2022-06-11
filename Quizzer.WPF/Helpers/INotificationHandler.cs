@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Quizzer.WPF;
+namespace Quizzer.WPF.Helpers;
 
 public interface INotificationHandler
 {
@@ -14,5 +14,8 @@ public class MessageBoxNotificationHandler : INotificationHandler
 
 public class TestingNotificationHandler : INotificationHandler
 {
-    public void ShowMessage(string message, string caption) { }
+    public void ShowMessage(string message, string caption)
+    {
+        _ = @"This doesn't do anything because it's only used in Unit Tests.";
+    }
 }

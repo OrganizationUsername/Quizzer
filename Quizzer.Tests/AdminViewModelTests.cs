@@ -12,7 +12,7 @@ public class PromptTests
 
 }
 
-public class AdminViewModelTests
+public class ViewModelTests
 {
     public static (AdministrationViewModel, QuizViewModel) GetViewModels()
     {
@@ -48,6 +48,7 @@ public class AdminViewModelTests
         avm.SelectedQuiz = "Clean";
         avm.SetQuiz();
         Assert.Equal(3, qvm.Questions.Count);
+        Assert.NotNull(qvm.CurrentQuestion);
     }
 
     [Fact]
@@ -57,6 +58,7 @@ public class AdminViewModelTests
         avm.SelectedQuiz = "";
         avm.SetQuiz();
         Assert.Empty(qvm.Questions);
+        Assert.Null(qvm.CurrentQuestion);
     }
 
     [Fact]
