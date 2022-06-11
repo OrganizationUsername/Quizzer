@@ -5,9 +5,14 @@ using Quizzer.WPF.Screens.Admin;
 
 namespace Quizzer.Tests;
 
+public class PromptTests
+{
+
+}
+
 public class AdminViewModelTests
 {
-    public AdministrationViewModel GetAdminViewModel()
+    public static AdministrationViewModel GetAdminViewModel()
     {
         var questionsMessenger = new QuestionsMessenger();
         var promptMessenger = new PromptMessenger();

@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -171,16 +169,12 @@ public partial class AdministrationViewModel
     public void SetQuiz()
     {
         if (SelectedQuiz is null) { return; }
-        try
-        {
-            var serialized = File.ReadAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"));
-            var promptPackage = JsonSerializer.Deserialize<PromptCollection>(serialized);
-            var prompts = promptPackage!.GetPrompts();
-            if (!prompts.Any()) { MessageBox.Show($"The selected Prompts package ({SelectedQuiz}) contained no valid prompts!"); return; }
 
-            var qs = prompts.OrderBy(_ => Random.Shared.Next()).Select(p => p.GenerateQuestion()).ToList();
-            _questionsMessenger.LoadQuestions(qs);
-        }
-        catch (Exception e) { MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{e}"); }
+        var (prompts, error) = _persistenceService.GetCollectionQuestions(SelectedQuiz);
+        if (error is not null) { MessageBox.Show($"There was an issue loading the prompts from ({SelectedQuiz}).{Environment.NewLine}{error}"); }
+
+        //ToDo: So here's where I would need to have some historical data on the user's performance per question
+        var qs = prompts.OrderBy(_ => Random.Shared.Next()).Select(p => p.GenerateQuestion()).ToList();
+        _questionsMessenger.LoadQuestions(qs);
     }
 }

@@ -58,23 +58,36 @@ public class JsonPersistenceService : IPersistenceService
         catch (Exception e) { return (false, e.ToString()); }
     }
 
-    public HashSet<string> InitializePersistence()
+    public List<string> InitializePersistence()
     {
         return GetPromptCollections(true);
     }
 
-    public HashSet<string> GetPromptCollections(bool includingDeleted)
+    public List<string> GetPromptCollections(bool includingDeleted)
     {
         if (!Directory.Exists(_directory)) { Directory.CreateDirectory(_directory); }
         CreateDefaultPrompts(_directory);
 
         var filePaths = Directory.GetFiles(_directory);
-        var (existingNames, existingNamesLower) = GetValidPromptCollections(filePaths);
+        var existingNames = GetValidPromptCollections(filePaths);
 
         return existingNames;
     }
 
-    private (HashSet<string> existingNames, HashSet<string> existingNamesLower) GetValidPromptCollections(string[] filePaths)
+    public (List<Prompt> prompts, string? error) GetCollectionQuestions(string SelectedQuiz)
+    {
+        var serialized = File.ReadAllText(Path.Combine(_directory, $"{SelectedQuiz}.prompts"));
+        var promptPackage = JsonSerializer.Deserialize<PromptCollection>(serialized);
+        var prompts = promptPackage!.GetPrompts();
+        if (!prompts.Any())
+        {
+            MessageBox.Show($"The selected Prompts package ({SelectedQuiz}) contained no valid prompts!");
+            return (new(), $"The selected Prompts package ({SelectedQuiz}) contained no valid prompts!");
+        }
+        return (prompts, null);
+    }
+
+    private List<string> GetValidPromptCollections(string[] filePaths)
     {
         var existingPromptsCollectionNames = new HashSet<string>();
         var existingPromptsCollectionNamesLower = new HashSet<string>();
@@ -86,7 +99,7 @@ public class JsonPersistenceService : IPersistenceService
                 var promptPackage = JsonSerializer.Deserialize<PromptCollection>(File.ReadAllText(file));
                 //I could iterate through it and make sure all of them have the minimum required fields.
 
-                if (promptPackage is not null && /*I should include it even if it's deleted, so we don't end up overwriting something that exists.*/
+                if (promptPackage is not null && !promptPackage.Deleted && !existingPromptsCollectionNamesLower.Contains(file.ToLower()) && /*I should include it even if it's deleted, so we don't end up overwriting something that exists.*/
                     ((promptPackage.GuessTheLetterPrompts != null && promptPackage.GuessTheLetterPrompts.Any()) || /*has either or*/
                      (promptPackage.TypeTheWordPrompts != null && promptPackage.TypeTheWordPrompts.Any()))
                    )
@@ -104,10 +117,10 @@ public class JsonPersistenceService : IPersistenceService
         }
         //ToDo: When I'm returning them, I should somehow indicate if they're deleted or not.
         //I should focus less on the deleted stuff.
-        return (existingPromptsCollectionNames, existingPromptsCollectionNamesLower);
+        return existingPromptsCollectionNames.ToList();
     }
 
-    private void CreateDefaultPrompts(string directory)
+    private static void CreateDefaultPrompts(string directory)
     {
         var serializerOptions = new JsonSerializerOptions() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true };
         try
@@ -141,18 +154,17 @@ public class JsonPersistenceService : IPersistenceService
     {
         try
         {
-            await using (var payLoad = File.OpenRead(Path.Combine(_directory, $"{name}.prompts{(deleted ? "x" : "")}")))
-            {
-                var ps = await JsonSerializer.DeserializeAsync<PromptCollection>(payLoad);
-                if (ps is null) { return await Task.FromResult(new List<Prompt>()); }
+            await using var payLoad = File.OpenRead(Path.Combine(_directory, $"{name}.prompts{(deleted ? "x" : "")}"));
+            var ps = await JsonSerializer.DeserializeAsync<PromptCollection>(payLoad);
+            if (ps is null) { return await Task.FromResult(new List<Prompt>()); }
 
-                var prompts = new List<Prompt>();
-                if (ps.GuessTheLetterPrompts is not null) { foreach (var prompt in ps.GuessTheLetterPrompts) { prompts.Add(prompt); } }
-                if (ps.TypeTheWordPrompts is not null) { foreach (var prompt in ps.TypeTheWordPrompts) { prompts.Add(prompt); } }
+            var prompts = new List<Prompt>();
+            if (ps.GuessTheLetterPrompts is not null) { foreach (var prompt in ps.GuessTheLetterPrompts) { prompts.Add(prompt); } }
+            if (ps.TypeTheWordPrompts is not null) { foreach (var prompt in ps.TypeTheWordPrompts) { prompts.Add(prompt); } }
 
-                return prompts;
-            }
+            return prompts;
         }
+        //ToDo: Return error message along with list.
         catch (Exception e) { return await Task.FromResult(new List<Prompt>()); }
     }
 }

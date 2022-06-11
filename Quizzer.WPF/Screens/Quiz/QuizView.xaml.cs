@@ -1,15 +1,2 @@
-﻿using System.Windows.Controls;
-
-namespace Quizzer.WPF.Screens.Quiz
-{
-    /// <summary>
-    /// Interaction logic for QuizView.xaml
-    /// </summary>
-    public partial class QuizView : UserControl
-    {
-        public QuizView()
-        {
-            InitializeComponent();
-        }
-    }
-}
+﻿namespace Quizzer.WPF.Screens.Quiz;
+public partial class QuizView { public QuizView() => InitializeComponent(); }
